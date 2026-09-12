@@ -1,0 +1,2 @@
+# Add this line inside the target 'App' block in ios/App/Podfile:
+pod 'GCDWebServer', '~> 3.5'

@@ -1,0 +1,60 @@
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #1a1a2e;
+  --bg-card: rgba(255,255,255,0.05);
+  --text-primary: #f0f0f0;
+  --text-secondary: #8888aa;
+  --accent: #6c5ce7;
+  --accent-light: #a29bfe;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overflow: hidden;
+}
+
+#root, .app-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-card);
+  border-radius: 4px;
+}
+
+a, button, .interactive {
+  transition: all 0.2s ease;
+}
+
+button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}

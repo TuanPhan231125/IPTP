@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+*.ipa
+*.p12
+*.mobileprovision
+.local-tools/
+ios/App/Pods/
+ios/App/build/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
