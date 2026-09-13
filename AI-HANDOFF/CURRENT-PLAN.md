@@ -1,4 +1,17 @@
-# Kế hoạch hiện tại — VibePlayer
+# Kế hoạch hiện tại — TPUGSOUND
+
+## Đợt mở rộng 13/09/2026 — đang thực hiện
+
+Người dùng xác nhận làm cả local, Railway, Gemini và YouTube. Project Railway được cung cấp: `871d544c-4630-42b4-ac03-38f7f014be3e`; chưa xác minh dịch vụ hay biến môi trường. Không ghi secret vào repo.
+
+1. Đổi tên hiển thị TPUGSOUND, giữ `com.vibeplayer.app` để cài đè; thay emoji bằng SVG thống nhất.
+2. Nhiều folder, quét sâu, định danh ổn định; ẩn/bỏ ẩn bền vững; codec do AVFoundation kiểm tra, hiển thị lý do tệp không phát được.
+3. Queue sửa thứ tự/phát tiếp/xóa, playlist/yêu thích/lịch sử, video native dùng chung AVPlayer và chế độ chỉ nghe, tùy chỉnh đĩa.
+4. Backend Express/Postgres, đồng bộ metadata có xác thực/xử lý xung đột; Gemini + tìm YouTube qua server, không nhúng key trong IPA. Cấu hình endpoint trong app để sau này không cần build lại.
+5. YouTube riêng biệt với local player; cần phân biệt khả năng đăng nhập/chặn quảng cáo của dịch vụ ngoài, không hứa các hành vi chưa kiểm chứng.
+6. Test Node, UI mobile, native Simulator, archive IPA; ghi chính xác phần chưa được thử trên iPhone thật.
+
+Trạng thái: bản nền Antigravity `4f4ca79` đã có CI xanh theo log bàn giao; chưa triển khai các mục mở rộng tại thời điểm ghi. Các phần dưới đây là lịch sử bản nền.
 
 Cập nhật 13/09/2026 bởi Codex. Đang sửa lỗi người dùng gặp trên iPhone; chưa xác nhận Phase 1 hoàn tất.
 

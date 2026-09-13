@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from '../Icon';
 import { formatTime } from '../../utils/formatTime';
 
 export default function PlayerControls({
@@ -23,13 +24,13 @@ export default function PlayerControls({
         <div className="progress-labels"><span>{formatTime(safeTime)}</span><span>{formatTime(safeDuration)}</span></div>
       </div>
       <div className="transport-controls">
-        <button aria-label="Phát ngẫu nhiên" aria-pressed={shuffle} onClick={handleToggleShuffle} className={shuffle ? 'active' : ''}>⤨</button>
-        <button aria-label="Bài trước" onClick={handlePrev}>⏮</button>
-        <button aria-label={isPlaying ? 'Tạm dừng' : 'Phát nhạc'} className="play-button" onClick={handleTogglePlay}>{isPlaying ? '⏸' : '▶'}</button>
-        <button aria-label="Bài tiếp theo" onClick={handleNext}>⏭</button>
+        <button aria-label="Phát ngẫu nhiên" aria-pressed={shuffle} onClick={handleToggleShuffle} className={shuffle ? 'active' : ''}><Icon name="shuffle"/></button>
+        <button aria-label="Bài trước" onClick={handlePrev}><Icon name="previous" size={28}/></button>
+        <button aria-label={isPlaying ? 'Tạm dừng' : 'Phát nhạc'} className="play-button" onClick={handleTogglePlay}><Icon name={isPlaying ? "pause" : "play"} size={30}/></button>
+        <button aria-label="Bài tiếp theo" onClick={handleNext}><Icon name="next" size={28}/></button>
         <button aria-label={repeatMode === 'one' ? 'Lặp một bài' : repeatMode === 'all' ? 'Lặp thư viện' : 'Không lặp'}
           aria-pressed={repeatMode !== 'off'} onClick={handleToggleRepeat} className={repeatMode !== 'off' ? 'active' : ''}>
-          {repeatMode === 'one' ? '↻¹' : '↻'}
+          <Icon name="repeat"/>{repeatMode === "one" && <sup>1</sup>}
         </button>
       </div>
     </div>

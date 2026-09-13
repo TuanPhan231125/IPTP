@@ -105,6 +105,14 @@ export function createPlayerController({ native = null, audioFactory = () => new
       queue = songs;
       publish(native ? {} : { currentIndex: queue.findIndex((song) => song.id === state.songId) });
     },
+    updateQueue(songs) {
+      if (state.songId && !songs.some(s => s.id === state.songId)) return Promise.resolve();
+      queue = songs;
+      publish({ currentIndex: queue.findIndex(s => s.id === state.songId) });
+      return native ? nativeCommand('updateQueue', { songs }) : Promise.resolve();
+    },
+    showVideo: () => native ? nativeCommand('showVideo') : Promise.resolve(),
+    setSleepTimer: (minutes) => native ? nativeCommand('setSleepTimer', { minutes }) : Promise.resolve(),
     playSong(song) {
       const startIndex = queue.findIndex((item) => item.id === song.id);
       if (startIndex < 0) return Promise.resolve();

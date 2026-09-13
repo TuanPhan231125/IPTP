@@ -20,6 +20,7 @@ export default function useLocalStorage(key, defaultValue) {
   const setValue = useCallback((value) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValueRef.current) : value;
+      storedValueRef.current = valueToStore;
       setStoredValue(valueToStore);
       localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {

@@ -86,7 +86,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: VibePlayer-unsigned-ipa
+          name: TPUGSOUND-unsigned-ipa
           path: ios/App/build/App.ipa
           if-no-files-found: error
           retention-days: 14

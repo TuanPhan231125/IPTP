@@ -1,7 +1,7 @@
 export function normalizeSongs(files) {
   const unique = new Map();
   for (const file of files) {
-    if (file.type && file.type !== 'audio') continue;
+    if (file.type && !['audio', 'video'].includes(file.type)) continue;
     const url = file.path || file.url;
     if (!url) continue;
     const fallback = (file.name || url.split('/').pop() || 'Bài hát').replace(/\.[^/.]+$/, '');
@@ -9,7 +9,7 @@ export function normalizeSongs(files) {
       id: file.id || url, url, title: file.title?.trim() || fallback,
       artist: file.artist?.trim() || 'Nghệ sĩ chưa biết', album: file.album?.trim() || 'Album chưa biết',
       coverArt: file.coverArt || null, duration: Number.isFinite(file.duration) ? Math.max(0, file.duration) : 0,
-      type: 'audio', extension: file.extension || '', size: file.size || 0,
+      type: file.type || 'audio', folderId: file.folderId || '', folderName: file.folderName || '', relativePath: file.relativePath || '', playable: file.playable !== false, playbackIssue: file.playbackIssue || '', extension: file.extension || '', size: file.size || 0,
     });
   }
   return [...unique.values()].sort((a, b) => a.title.localeCompare(b.title, 'vi', { numeric: true }) || a.id.localeCompare(b.id));

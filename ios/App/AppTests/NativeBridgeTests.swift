@@ -12,8 +12,9 @@ final class NativeBridgeTests: XCTestCase {
         controller.loadViewIfNeeded()
         let bridge = try XCTUnwrap(controller.bridge)
         XCTAssertTrue(bridge.plugin(withName: "FolderPicker") is FolderPickerPlugin)
+        XCTAssertTrue(bridge.plugin(withName: "CloudBridge") is CloudBridgePlugin)
         let audio = try XCTUnwrap(bridge.plugin(withName: "NativeAudio") as? NativeAudioPlugin)
-        for method in ["setQueue", "play", "pause", "next", "previous", "seek", "setShuffle", "setRepeat", "stop", "getState"] {
+        for method in ["setQueue", "play", "pause", "next", "previous", "seek", "setShuffle", "setRepeat", "stop", "getState", "updateQueue", "showVideo", "setSleepTimer", "getHistory"] {
             XCTAssertTrue(audio.pluginMethods.contains(where: { $0.name == method }), "Missing bridge export: \(method)")
             XCTAssertTrue(audio.responds(to: NSSelectorFromString(method + ":")), "Missing Swift selector: \(method)")
         }
@@ -27,6 +28,11 @@ final class NativeBridgeTests: XCTestCase {
           const call = (plugin, method, args = {}) => window.Capacitor.nativePromise(plugin, method, args);
           const bookmark = await call('FolderPicker', 'checkBookmark');
           const initial = await call('NativeAudio', 'getState');
+          await call('NativeAudio', 'updateQueue', {songs: []});
+          await call('NativeAudio', 'setSleepTimer', {minutes: 15});
+          const timer = await call('NativeAudio', 'getState');
+          const history = await call('NativeAudio', 'getHistory');
+          const connection = await call('CloudBridge', 'getConnection');
           await call('NativeAudio', 'setShuffle', {enabled: true});
           await call('NativeAudio', 'setRepeat', {mode: 'all'});
           const configured = await call('NativeAudio', 'getState');
@@ -34,7 +40,7 @@ final class NativeBridgeTests: XCTestCase {
           try { await call('NativeAudio', 'setQueue', {songs: [], startIndex: 0}); }
           catch (e) { invalidQueueRejected = e.code === 'PLAYBACK'; }
           await call('NativeAudio', 'stop');
-          window.__nativeSmoke = {ok: true, bookmark, initial, configured, invalidQueueRejected};
+          window.__nativeSmoke = {ok: true, bookmark, initial, configured, invalidQueueRejected, timer, history, connection};
         })().catch(e => { window.__nativeSmoke = {ok: false, message: e.message}; });
         true;
         """
@@ -52,6 +58,7 @@ final class NativeBridgeTests: XCTestCase {
         XCTAssertEqual((report["configured"] as? [String: Any])?["shuffle"] as? Bool, true)
         XCTAssertEqual((report["configured"] as? [String: Any])?["repeatMode"] as? String, "all")
         XCTAssertEqual(report["invalidQueueRejected"] as? Bool, true)
+        XCTAssertGreaterThan((report["timer"] as? [String: Any])?["sleepRemaining"] as? Double ?? 0, 890)
     }
 
     @MainActor

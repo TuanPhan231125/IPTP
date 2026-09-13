@@ -77,8 +77,9 @@ test('metadata normalization keeps duplicate filenames from different subfolders
     { path: '/music/b/song.mp3', name: 'song.mp3', artist: 'B', coverArt: 'data:image/jpeg;base64,test' },
     { path: '/music/video.mp4', type: 'video' },
   ]);
-  assert.equal(result.length, 2);
+  assert.equal(result.length, 3);
   assert.notEqual(result[0].id, result[1].id);
   assert.equal(result[0].duration, 0);
   assert.ok(result[1].coverArt);
 });
+

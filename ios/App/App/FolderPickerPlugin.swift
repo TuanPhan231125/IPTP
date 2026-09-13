@@ -17,18 +17,13 @@ public class FolderPickerPlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDe
     ]
     private var pickerCall: CAPPluginCall?
     private let scanQueue = DispatchQueue(label: "com.vibeplayer.library", qos: .userInitiated)
-    private let audioExtensions: Set<String> = ["mp3", "m4a", "wav", "aac"]
+    private let mediaExtensions: Set<String> = ["mp3", "m4a", "wav", "aac", "flac", "aiff", "aif", "caf", "alac", "mp4", "mov", "m4v", "3gp", "3g2", "ac3", "eac3", "ogg", "opus", "webm", "mkv", "avi", "wma"]
 
     @objc func checkBookmark(_ call: CAPPluginCall) {
         scanQueue.async {
-            do {
-                let access = try FolderAccessStore.shared.acquire()
-                call.resolve(["hasBookmark": true, "path": access.url.path])
-            } catch LibraryAccessError.noFolder {
-                call.resolve(["hasBookmark": false])
-            } catch {
-                call.resolve(["hasBookmark": false, "error": error.localizedDescription])
-            }
+            let folders = FolderAccessStore.shared.list()
+            call.resolve(["hasBookmark": !folders.isEmpty])
+
         }
     }
 
@@ -75,51 +70,55 @@ public class FolderPickerPlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDe
     }
 
     @objc func clearBookmark(_ call: CAPPluginCall) {
-        FolderAccessStore.shared.clear()
+        FolderAccessStore.shared.clear(id: call.getString("folderId"))
         call.resolve()
     }
 
     @objc func scanFolder(_ call: CAPPluginCall) {
         scanQueue.async {
-            do {
-                let access = try FolderAccessStore.shared.acquire()
-                var paths: [URL] = []
-                var enumerationError: Error?
-                var coordinationError: NSError?
-                NSFileCoordinator().coordinate(readingItemAt: access.url, options: [],
-                                                error: &coordinationError) { folder in
-                    let keys: [URLResourceKey] = [.isRegularFileKey, .fileSizeKey]
-                    guard let enumerator = FileManager.default.enumerator(
-                        at: folder, includingPropertiesForKeys: keys,
-                        options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                        errorHandler: { _, error in enumerationError = error; return true }
-                    ) else {
-                        enumerationError = LibraryAccessError.invalidFolder
-                        return
+            var files: [[String: Any]] = []
+            var folders: [[String: Any]] = []
+            var seen = Set<String>()
+            var artworkBudget = 6 * 1024 * 1024
+            for folder in FolderAccessStore.shared.list() {
+                var info: [String: Any] = ["id": folder.id, "name": folder.name, "path": folder.path]
+                do {
+                    let access = try FolderAccessStore.shared.acquire(id: folder.id)
+                    info["path"] = access.url.path
+                    var paths: [URL] = []
+                    var enumerationError: Error?
+                    var coordinationError: NSError?
+                    NSFileCoordinator().coordinate(readingItemAt: access.url, options: [], error: &coordinationError) { root in
+                        if let enumerator = FileManager.default.enumerator(at: root,
+                            includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey],
+                            options: [.skipsHiddenFiles, .skipsPackageDescendants],
+                            errorHandler: { _, error in enumerationError = error; return true }) {
+                            for case let file as URL in enumerator {
+                                let values = try? file.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                                guard self.mediaExtensions.contains(file.pathExtension.lowercased()),
+                                      values?.isRegularFile == true, values?.isSymbolicLink != true,
+                                      (try? access.fileURL(for: file.path)) != nil else { continue }
+                                paths.append(file)
+                            }
+                        } else { enumerationError = LibraryAccessError.invalidFolder }
                     }
-                    for case let file as URL in enumerator {
-                        guard self.audioExtensions.contains(file.pathExtension.lowercased()),
-                              (try? file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true
-                        else { continue }
-                        paths.append(file)
+                    if let error = coordinationError { throw error }
+                    if let error = enumerationError { info["error"] = error.localizedDescription }
+                    for url in paths.sorted(by: { $0.path < $1.path }) where seen.insert(url.path).inserted {
+                        autoreleasepool {
+                            var file = self.describe(url, artworkBudget: &artworkBudget)
+                            let relative = String(url.path.dropFirst(access.url.path.count + 1))
+                            file["id"] = folder.id + ":" + relative
+                            file["folderId"] = folder.id
+                            file["folderName"] = folder.name
+                            file["relativePath"] = relative
+                            files.append(file)
+                        }
                     }
-                }
-                if let error = coordinationError { throw error }
-                if paths.isEmpty, let error = enumerationError { throw error }
-                paths.sort { $0.path.localizedStandardCompare($1.path) == .orderedAscending }
-                var files: [[String: Any]] = []
-                // Bound bridge memory. Only small cover thumbnails are encoded;
-                // the original music files always stay in the selected folder.
-                var artworkBudget = 6 * 1024 * 1024
-                for url in paths {
-                    autoreleasepool {
-                        files.append(self.describe(url, artworkBudget: &artworkBudget))
-                    }
-                }
-                var result: [String: Any] = ["files": files, "folderPath": access.url.path]
-                if let error = enumerationError { result["warning"] = error.localizedDescription }
-                call.resolve(result)
-            } catch { call.reject(error.localizedDescription, "FOLDER_ACCESS") }
+                } catch { info["error"] = error.localizedDescription }
+                folders.append(info)
+            }
+            call.resolve(["files": files, "folders": folders])
         }
     }
 
@@ -135,6 +134,9 @@ public class FolderPickerPlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDe
         var coordinationError: NSError?
         NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readableURL in
             let asset = AVURLAsset(url: readableURL)
+            file["playable"] = asset.isPlayable
+            file["type"] = asset.tracks(withMediaType: .video).isEmpty ? "audio" : "video"
+            if !asset.isPlayable { file["playbackIssue"] = "iOS không giải mã được tệp này. Đổi sang AAC/ALAC/FLAC hoặc H.264/HEVC trong MP4." }
             let metadata = asset.commonMetadata
             for (key, field) in [(AVMetadataKey.commonKeyTitle, "title"),
                                  (AVMetadataKey.commonKeyArtist, "artist"),
@@ -153,6 +155,7 @@ public class FolderPickerPlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDe
                 artworkBudget -= cover.utf8.count
             }
         }
+        if let error = coordinationError { file["playable"] = false; file["playbackIssue"] = error.localizedDescription }
         return file
     }
 

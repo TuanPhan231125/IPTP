@@ -1,6 +1,6 @@
 {
   "appId": "com.vibeplayer.app",
-  "appName": "VibePlayer",
+  "appName": "TPUGSOUND",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

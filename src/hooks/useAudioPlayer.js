@@ -6,6 +6,7 @@ const NativeAudio = registerPlugin('NativeAudio');
 
 export default function useAudioPlayer() {
   const [state, setState] = useState(INITIAL_PLAYER_STATE);
+  const [nativeHistory, setNativeHistory] = useState([]);
   const [queue, setQueueState] = useState([]);
   const queueRef = useRef([]);
   const controllerRef = useRef(null);
@@ -17,10 +18,14 @@ export default function useAudioPlayer() {
     });
     controllerRef.current = controller;
     controller.setQueue(queueRef.current);
-    const refresh = () => { if (document.visibilityState !== 'hidden') controller.refresh(); };
+    const refreshHistory = () => { if (Capacitor.isNativePlatform()) NativeAudio.getHistory().then(r => setNativeHistory(r.items || [])).catch(() => {}); };
+    refreshHistory();
+    const historyTimer = setInterval(refreshHistory, 5000);
+    const refresh = () => { refreshHistory(); if (document.visibilityState !== 'hidden') controller.refresh(); };
     document.addEventListener('visibilitychange', refresh);
     window.addEventListener('pageshow', refresh);
     return () => {
+      clearInterval(historyTimer);
       document.removeEventListener('visibilitychange', refresh);
       window.removeEventListener('pageshow', refresh);
       controller.dispose();
@@ -33,6 +38,12 @@ export default function useAudioPlayer() {
     setQueueState(songs);
     controllerRef.current?.setQueue(songs);
   }, []);
+  const updateQueue = useCallback((songs) => {
+    queueRef.current = songs; setQueueState(songs);
+    return controllerRef.current?.updateQueue(songs);
+  }, []);
+  const showVideo = useCallback(() => controllerRef.current?.showVideo(), []);
+  const setSleepTimer = useCallback((minutes) => controllerRef.current?.setSleepTimer(minutes), []);
   const playSong = useCallback((song) => controllerRef.current?.playSong(song), []);
   const pause = useCallback(() => controllerRef.current?.pause(), []);
   const resume = useCallback(() => controllerRef.current?.play(), []);
@@ -56,8 +67,8 @@ export default function useAudioPlayer() {
   const dismissError = useCallback(() => controllerRef.current?.dismissError(), []);
 
   useEffect(() => {
-    document.title = state.currentSong ? `${state.currentSong.title} — VibePlayer` : 'VibePlayer';
+    document.title = state.currentSong ? `${state.currentSong.title} — TPUGSOUND` : 'TPUGSOUND';
   }, [state.currentSong]);
 
-  return { ...state, queue, setQueue, playSong, pause, resume, togglePlay, next, prev, seek, stop, toggleShuffle, toggleRepeat, dismissError };
+  return { ...state, nativeHistory, queue, setQueue, updateQueue, showVideo, setSleepTimer, playSong, pause, resume, togglePlay, next, prev, seek, stop, toggleShuffle, toggleRepeat, dismissError };
 }

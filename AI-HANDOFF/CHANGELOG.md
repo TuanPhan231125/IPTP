@@ -57,3 +57,21 @@
 - Run 34738983052 đã vào compile source native và phát hiện dictionary JSObject không chấp nhận giá trị ép kiểu Any. Đã đổi trạng thái nullable sang JSValue/NSNull đúng kiểu Capacitor.
 - Cập nhật hướng dẫn GitHub/IPA cho repository đã tồn tại và workflow mới; đánh dấu báo cáo rà soát đầu là tài liệu lịch sử.
 - Chưa có IPA mới; tiếp tục xác minh bằng CI.
+
+## 2026-09-13 — Antigravity — Sửa shared scheme, build IPA thành công
+
+- **Yêu cầu:** Tiếp tục từ Codex (hết lượt lần 2). 4 lần build CI liên tiếp fail.
+- **Nguyên nhân:** Xcode workspace thiếu shared scheme "App". CI chạy `xcodebuild -scheme App archive` không tìm thấy scheme.
+- **Đã thực hiện:** Tạo `ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme`, push commit `4f4ca79`.
+- **Kiểm thử/bằng chứng:** GitHub Actions run `34739935849` — tất cả bước thành công: 12/12 Node tests, native plugin test trên iOS Simulator, build unsigned archive (Release, iphoneos), package IPA, upload artifact.
+- **Artifact:** `VibePlayer-unsigned-ipa` có sẵn trên GitHub Actions.
+- **Bước tiếp theo:** Người dùng tải IPA mới, cài qua Sideloadly và test trên iOS 18.7.8.
+
+## 2026-09-13 — Codex — TPUGSOUND, mở rộng local và dựng backend (đang làm)
+
+- Người dùng xác nhận bao gồm Railway/Gemini/YouTube; cho URL project Railway. Đã vào được bằng phiên người dùng đăng nhập. Dịch vụ IPTP nối GitHub nhưng chưa có env tùy chỉnh/database/domain lúc kiểm tra.
+- Đã viết: SVG icons, tên hiển thị TPUGSOUND (giữ com.vibeplayer.app), folder store nhiều bookmark + migrate legacy, scan nhiều định dạng + isPlayable, hidden bền vững, queue update native, video AVKit dùng cùng AVPlayer, timer/history native, playlist/favorite/tags/settings/mood UI, CloudBridge Keychain và YouTube WebView riêng.
+- Backend mới server/: Express/Postgres, xác thực bằng APP_PASSWORD rồi token 30 ngày, CAS revision để không ghi đè đồng bộ âm thầm, Gemini structured output, YouTube search cache; Dockerfile/railway.json.
+- Kiểm thử tại mốc này: 16/16 Node app tests, 5/5 backend HTTP tests với store/provider giả; web build thành công. Chưa test native/IPA của bản mở rộng, chưa chạy API Gemini/YouTube thật, chưa nối Postgres thật.
+- Đang tiếp tục: tạo Postgres Railway, cấu hình service/domain, UI mobile QA, native CI và IPA. Đã yêu cầu người dùng tự thêm GEMINI_API_KEY, YOUTUBE_API_KEY, APP_PASSWORD vào Railway; chưa nhận xác nhận hoàn tất.
+- Không đánh dấu các phase hoàn tất. Cần thử trên iPhone thật sau khi CI qua. Quảng cáo YouTube/đăng nhập embedded có giới hạn, UI ghi rõ và có Safari fallback.

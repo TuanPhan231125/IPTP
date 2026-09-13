@@ -3,6 +3,7 @@ import UIKit
 import Capacitor
 import AVFoundation
 import MediaPlayer
+import AVKit
 
 @objc(NativeAudioPlugin)
 public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -18,23 +19,31 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "setShuffle", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setRepeat", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "getState", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "getState", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "updateQueue", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "showVideo", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setSleepTimer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getHistory", returnType: CAPPluginReturnPromise)
     ]
 
     private struct Track {
         let id: String
         let path: String
+        let folderID: String?
         let title: String
         let artist: String
         let album: String
         let duration: Double
         let coverArt: String?
+        let reference: [String: Any]
 
         init?(_ value: JSObject) {
             guard let path = (value["url"] ?? value["path"]) as? String,
                   let id = value["id"] as? String, !id.isEmpty, path.hasPrefix("/") else { return nil }
             self.id = id
             self.path = path
+            folderID = value["folderId"] as? String
+            reference = ["id": id, "source": "local", "title": value["title"] as? String ?? "", "artist": value["artist"] as? String ?? "", "folderName": value["folderName"] as? String ?? "", "relativePath": value["relativePath"] as? String ?? "", "size": value["size"] as? Int ?? 0]
             title = value["title"] as? String ?? URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent
             artist = value["artist"] as? String ?? "Không rõ nghệ sĩ"
             album = value["album"] as? String ?? "Không rõ album"
@@ -48,6 +57,9 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     // including while iOS suspends the WebView.
     private let player = AVPlayer()
     private var tracks: [Track] = []
+    private weak var videoController: AVPlayerViewController?
+    private var sleepDeadline: Date?
+    private var historyRecordedID: String?
     private var index = -1
     private var access: FolderAccessLease?
     private var shuffle = false
@@ -69,7 +81,14 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             self.timeObserver = self.player.addPeriodicTimeObserver(
                 forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main
-            ) { [weak self] _ in self?.emitState() }
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                if let deadline = self.sleepDeadline, deadline <= Date() {
+                    self.sleepDeadline = nil
+                    self.pausePlayback()
+                }
+                self.emitState()
+            }
             self.installNotifications()
             self.installRemoteCommands()
         }
@@ -88,6 +107,7 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     private func state() -> JSObject {
         var snapshot: JSObject = [
             "apiVersion": 1,
+            "sleepRemaining": max(0, sleepDeadline?.timeIntervalSinceNow ?? 0),
             "songId": NSNull(),
             "currentIndex": index, "isPlaying": player.rate > 0,
             "currentTime": seconds, "duration": duration,
@@ -100,10 +120,23 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func emitState() {
+        recordHistoryIfPlaying()
         updateNowPlayingPosition()
         notifyListeners("stateChanged", data: state())
     }
 
+    private func recordHistoryIfPlaying() {
+        guard player.rate > 0, let track = currentTrack, historyRecordedID != track.id else { return }
+        historyRecordedID = track.id
+        var entries = UserDefaults.standard.array(forKey: "tpugsound.history") as? [[String: Any]] ?? []
+        entries.insert(["id": UUID().uuidString, "at": ISO8601DateFormatter().string(from: Date()), "track": track.reference], at: 0)
+        UserDefaults.standard.set(Array(entries.prefix(200)), forKey: "tpugsound.history")
+    }
+    @objc func getHistory(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            call.resolve(["items": UserDefaults.standard.array(forKey: "tpugsound.history") ?? []])
+        }
+    }
     private func fail(_ error: Error) {
         wantsPlayback = false
         player.pause()
@@ -138,13 +171,52 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             guard tracks.count == values.count, tracks.indices.contains(startIndex) else {
                 throw LibraryAccessError.invalidFile
             }
-            let newAccess = try FolderAccessStore.shared.acquire()
+            let newAccess = try FolderAccessStore.shared.acquire(for: tracks[startIndex].path, folderID: tracks[startIndex].folderID)
             _ = try newAccess.fileURL(for: tracks[startIndex].path)
             self.player.pause()
             self.player.replaceCurrentItem(with: nil)
             self.access = newAccess
             self.tracks = tracks
             try self.loadTrack(startIndex, autoplay: call.getBool("autoplay") ?? true)
+        }
+    }
+
+    // Edit upcoming tracks without replacing the currently playing AVPlayerItem.
+    @objc func updateQueue(_ call: CAPPluginCall) {
+        run(call) {
+            guard let values = call.getArray("songs", JSObject.self) else { throw LibraryAccessError.invalidFile }
+            let updated = values.compactMap(Track.init)
+            guard updated.count == values.count else { throw LibraryAccessError.invalidFile }
+            if let current = self.currentTrack {
+                guard let newIndex = updated.firstIndex(where: { $0.id == current.id }) else {
+                    throw NSError(domain: "TPUGSOUND", code: 2, userInfo: [NSLocalizedDescriptionKey: "Dừng bài đang phát trước khi xóa khỏi hàng đợi."])
+                }
+                self.tracks = updated
+                self.index = newIndex
+            } else {
+                self.tracks = updated
+                self.index = -1
+            }
+        }
+    }
+    @objc func showVideo(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard self.player.currentItem != nil, let parent = self.bridge?.viewController,
+                  parent.presentedViewController == nil else { call.reject("Chưa có video hoặc cửa sổ khác đang mở."); return }
+            let controller = AVPlayerViewController()
+            controller.player = self.player
+            controller.updatesNowPlayingInfoCenter = false
+            controller.allowsPictureInPicturePlayback = false
+            self.videoController = controller
+            // Closing the video view detaches the layer; the same player keeps its position.
+            parent.present(controller, animated: true) { call.resolve() }
+        }
+    }
+    @objc func setSleepTimer(_ call: CAPPluginCall) {
+        run(call) {
+            let minutes = call.getDouble("minutes") ?? 0
+            guard minutes.isFinite, minutes >= 0, minutes <= 180 else { throw LibraryAccessError.invalidFile }
+            self.sleepDeadline = minutes > 0 ? Date().addingTimeInterval(minutes * 60) : nil
         }
     }
 
@@ -168,6 +240,8 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func stop(_ call: CAPPluginCall) {
         run(call) {
             self.pausePlayback()
+            self.videoController?.dismiss(animated: true)
+            self.sleepDeadline = nil
             self.itemObserver = nil
             self.player.replaceCurrentItem(with: nil)
             self.tracks = []
@@ -187,17 +261,20 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func loadTrack(_ newIndex: Int, autoplay: Bool) throws {
-        guard tracks.indices.contains(newIndex), let access = access else { throw LibraryAccessError.invalidFile }
+        guard tracks.indices.contains(newIndex) else { throw LibraryAccessError.invalidFile }
         let track = tracks[newIndex]
-        let url = try access.fileURL(for: track.path)
+        let newAccess = try FolderAccessStore.shared.acquire(for: track.path, folderID: track.folderID)
+        let url = try newAccess.fileURL(for: track.path)
         itemObserver = nil
         player.pause()
         let item = AVPlayerItem(url: url)
         index = newIndex
+        historyRecordedID = nil
         ended = false
         playbackError = nil
         wantsPlayback = autoplay
         player.replaceCurrentItem(with: item)
+        access = newAccess
         itemObserver = item.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
             DispatchQueue.main.async {
                 guard let self = self, self.player.currentItem === item else { return }
@@ -251,6 +328,8 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func installNotifications() {
         let center = NotificationCenter.default
+        notifications.append(center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in self?.videoController?.player = nil })
+        notifications.append(center.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in guard let self = self else { return }; self.videoController?.player = self.player })
         notifications.append(center.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self] note in
             guard let self = self, let item = note.object as? AVPlayerItem, item === self.player.currentItem else { return }
             do { try self.advance(1, fromEnd: true) } catch { self.fail(error) }

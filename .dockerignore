@@ -1,0 +1,9 @@
+.git
+.local-tools
+node_modules
+server/node_modules
+**/.env
+**/.env.*
+ios
+dist
+
