@@ -2,7 +2,7 @@
 
 Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`, kiểm tra ngày 13/09/2026.
 
-**Hiện app chưa hoàn tất Phase 1.** Phần web đã build thành công, nhưng phần chọn thư mục, phát nhạc và nghe nền còn cần sửa. Bạn có thể đưa mã nguồn lên GitHub ngay để lưu dự án. Chỉ coi IPA là bản dùng thử được sau khi sửa các lỗi trong [báo cáo hiện trạng](TINH-TRANG-DU-AN.md), build iOS thành công và thử trên iPhone.
+Repository đang dùng là **[TuanPhan231125/IPTP](https://github.com/TuanPhan231125/IPTP)**. Mã đã được push; bạn không cần tạo repository hoặc khởi tạo Git lại. Để tải bản mới, bắt đầu từ bước 4–6 bên dưới. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký](AI-HANDOFF/CHANGELOG.md) để biết commit/build nào đã được kiểm chứng. Thử nhạc local và nghe nền trên iPhone vẫn là bước cần thực hiện trước khi chốt Phase 1.
 
 ## 1. Cần up những gì?
 
@@ -25,11 +25,13 @@ Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`
 | `ios/App/App/public/` và config được Capacitor tạo | Không | Workflow chạy `cap sync` để tạo lại |
 | Nhạc cá nhân, mật khẩu, API key, file `.ipa` tải về | Không | Không phải mã nguồn cần build |
 
-Hai file `.gitignore` hiện có đã bỏ qua các thư mục build/thư viện nói trên và file tên đúng `.env`. **Chúng chưa bỏ qua mọi tên như `.env.local` hay mọi file `.ipa`**; hãy để IPA tải về trong Downloads, và cập nhật quy tắc bỏ qua khi sau này thêm backend/biến môi trường.
+Hai file `.gitignore` hiện có bỏ qua thư viện/build, `.env`, `.env.*` (ngoại trừ `.env.example`), `.ipa`, chứng chỉ và `.local-tools/`. IPA là kết quả tải về, không cần đưa vào lịch sử Git.
 
 Trên trang Code của repository, phải thấy `src`, `ios`, `.github`, `package.json` ngay ở tầng đầu tiên. Đừng tạo thêm một tầng `APPIOS/` bao ngoài chúng, cũng đừng chỉ upload một file ZIP chứa dự án: workflow cần nằm đúng ở `.github/workflows/` tại gốc repository.
 
 ## 2. Tạo repository trên màn hình GitHub bạn đang mở
+
+Phần này là hướng dẫn cho lần tạo dự án mới. Với IPTP đã tồn tại, bỏ qua bước 2 và 3.
 
 1. Bấm nút xanh **Create repository** ở bên trái ảnh bạn gửi, hoặc mở [trang tạo repository](https://github.com/new).
 2. **Owner**: chọn tài khoản của bạn.
@@ -97,7 +99,7 @@ Cuối cùng, tải lại trang repository bằng F5. Các file hiện trên tab
 
 ## 4. Chạy build để tạo IPA
 
-Workflow đã tồn tại trong dự án. Tên hiển thị là **Build Unsigned iOS IPA**. Nó đang được cấu hình chạy thủ công, nên push xong chưa tự tạo IPA.
+Workflow **Build Unsigned iOS IPA** tự chạy khi push thay đổi code, tests hoặc workflow lên `main`. Chỉ thay tài liệu sẽ không tự build. Bạn cũng có thể chạy thủ công như sau.
 
 Sau khi phần iOS đã được sửa và đẩy lên:
 
@@ -110,9 +112,9 @@ Sau khi phần iOS đã được sửa và đẩy lên:
 
 Nút chạy thủ công cần file workflow có trong nhánh mặc định của repository. [Hướng dẫn chạy workflow](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
 
-Workflow hiện chạy các bước: cài thư viện → build web → đồng bộ Capacitor → cài CocoaPods → build iOS Release cho thiết bị thật → đóng gói `App.ipa` → tải kết quả lên Artifacts. Các bước macOS chạy trên GitHub, không cần chạy `pod install` hoặc `xcodebuild` trên Windows.
+Workflow chạy: cài thư viện → Node tests → build web → đồng bộ Capacitor/CocoaPods → kiểm tra hai plugin trên iOS Simulator → build iOS Release cho thiết bị thật → đóng gói `App.ipa` → Artifacts. Các bước macOS chạy trên GitHub, không cần `pod install` hoặc `xcodebuild` trên Windows.
 
-**Việc cần cập nhật trước khi dùng lâu dài:** workflow đang dùng `macos-14`. GitHub đã thông báo ngừng hỗ trợ image này vào 02/11/2026; cần chuyển sang runner còn được hỗ trợ và kiểm tra lại bản build. Đây là một mục còn phải sửa, chưa được thay đổi trong lần rà soát này. [Thông báo runner macOS 14](https://github.com/actions/runner-images/issues/13518).
+Workflow hiện dùng **macOS 15, Xcode 16.4 và Node 24**. Artifact IPA được giữ 14 ngày; nên lưu bản cần dùng về máy.
 
 ## 5. Chính xác tải IPA ở đâu?
 
@@ -181,4 +183,4 @@ Sau đó lặp lại bước 4–6. Workflow tự build web và sync iOS, nên k
 | Push bị `non-fast-forward` | Repo trên GitHub có nội dung khác; lấy thông báo để xử lý, không dùng force push theo phỏng đoán |
 | Sideloadly không thấy điện thoại | Kiểm tra cáp, mở khóa/Tin cậy và driver theo FAQ chính thức |
 
-Trong lần rà soát này, chưa tạo repository, chưa push lên tài khoản GitHub, chưa chạy build macOS và chưa có IPA được tạo để bàn giao.
+Luôn tải IPA từ lượt chạy thành công được ghi trong AI-HANDOFF. Một lượt build đỏ không tạo ra bản IPA đã sửa; việc tải lại artifact của lượt xanh cũ sẽ vẫn lấy app cũ. Cài đè bằng cùng Apple ID/bundle ID trong Sideloadly để giữ dữ liệu hiện có.

@@ -51,3 +51,9 @@
 - Commit b9f46a8 đã push; 12/12 Node tests và web build qua. Giao diện 390×844 được kiểm tra bằng trình duyệt: thư viện mở đúng, phát/tạm dừng hoạt động, không có lỗi console.
 - Run 34738888608 dừng ở cấu hình test bundle chưa có PRODUCT_NAME, trước khi compile native. Đã thêm tên bundle và dùng scheme AppSmokeTests riêng để test target không tham gia archive App.
 - Chưa có IPA mới tại thời điểm ghi mục này; đang chạy lại CI.
+
+## 2026-09-13 — Codex — Sửa kiểu trạng thái bridge theo log Xcode
+
+- Run 34738983052 đã vào compile source native và phát hiện dictionary JSObject không chấp nhận giá trị ép kiểu Any. Đã đổi trạng thái nullable sang JSValue/NSNull đúng kiểu Capacitor.
+- Cập nhật hướng dẫn GitHub/IPA cho repository đã tồn tại và workflow mới; đánh dấu báo cáo rà soát đầu là tài liệu lịch sử.
+- Chưa có IPA mới; tiếp tục xác minh bằng CI.

@@ -86,14 +86,17 @@ public class NativeAudioPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func state() -> JSObject {
-        return [
+        var snapshot: JSObject = [
             "apiVersion": 1,
-            "songId": currentTrack?.id as Any? ?? NSNull(),
+            "songId": NSNull(),
             "currentIndex": index, "isPlaying": player.rate > 0,
             "currentTime": seconds, "duration": duration,
             "shuffle": shuffle, "repeatMode": repeatMode,
-            "error": playbackError as Any? ?? NSNull()
+            "error": NSNull()
         ]
+        if let songID = currentTrack?.id { snapshot["songId"] = songID }
+        if let error = playbackError { snapshot["error"] = error }
+        return snapshot
     }
 
     private func emitState() {

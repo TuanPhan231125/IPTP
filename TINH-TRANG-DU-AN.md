@@ -1,5 +1,7 @@
 # VibePlayer — hiện trạng và phạm vi bản đầu
 
+> Đây là báo cáo lịch sử trước khi triển khai/sửa lỗi. Nhiều mục đã thay đổi sau đó. Trạng thái mới nhất nằm trong [AI-HANDOFF/CURRENT-PLAN.md](AI-HANDOFF/CURRENT-PLAN.md) và [CHANGELOG.md](AI-HANDOFF/CHANGELOG.md).
+
 Rà soát ngày 13/09/2026 từ mã nguồn trong APPIOS, `vibe-player-spec.md`, `huong-dan-tao-ipa.md` và bản Implementation Plan được đính kèm.
 
 **Kết luận: đã có khung Phase 1, nhưng Phase 1 chưa hoàn tất.** Các dấu ✅ trong Implementation Plan mô tả phạm vi dự kiến, không phải bằng chứng đã làm xong hoặc đã kiểm thử.
