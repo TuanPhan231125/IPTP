@@ -17,6 +17,7 @@ tests.build_configurations.each do |config|
   config.base_configuration_reference = app_config.base_configuration_reference
   config.build_settings.merge!({
     'SWIFT_VERSION' => '5.0',
+    'PRODUCT_NAME' => '$(TARGET_NAME)',
     'GENERATE_INFOPLIST_FILE' => 'YES',
     'PRODUCT_BUNDLE_IDENTIFIER' => 'com.vibeplayer.app.tests',
     'TEST_HOST' => '$(BUILT_PRODUCTS_DIR)/App.app/App',
@@ -30,4 +31,4 @@ scheme.add_build_target(app)
 scheme.add_build_target(tests)
 scheme.add_test_target(tests)
 scheme.set_launch_target(app)
-scheme.save_as(project_path, 'App', true)
+scheme.save_as(project_path, 'AppSmokeTests', true)

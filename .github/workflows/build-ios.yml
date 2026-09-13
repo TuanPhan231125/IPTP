@@ -56,7 +56,7 @@ jobs:
           set -o pipefail
           ruby scripts/configure-ios-tests.rb
           xcodebuild -workspace ios/App/App.xcworkspace \
-            -scheme App -configuration Debug \
+            -scheme AppSmokeTests -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
             -resultBundlePath "$RUNNER_TEMP/NativeBridgeTests.xcresult" \
             CODE_SIGNING_ALLOWED=NO test 2>&1 | tee "$RUNNER_TEMP/native-tests.log"

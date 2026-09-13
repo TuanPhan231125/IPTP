@@ -45,3 +45,9 @@
 - **Thay đổi:** nối storyboard tới VibeBridgeViewController; dùng CAPBridgedPlugin Swift cho hai plugin, bỏ bridge .m trùng; NativeAudio có queue và event đầy đủ, next/previous/end-of-track xử lý native; bỏ LocalFileServer/GCDWebServer khỏi app; bổ sung CSS/safe area cho picker/library/player. Build number tăng từ 1 lên 3.
 - **Kiểm thử bổ sung:** tests gọi source utils thật và controller/native contract; CI chạy hosted XCTest trên iPhone 16 Simulator iOS 18.5, kiểm tra controller thật và vòng gọi JavaScript → FolderPicker/NativeAudio → kết quả.
 - **Trạng thái:** đang kiểm tra/push/build. Không coi Phase 1 hoàn tất trước khi có kết quả build và thử thiết bị; sẽ ghi kết quả thực tế ở mục tiếp theo.
+
+## 2026-09-13 — Codex — Điều chỉnh cấu hình kiểm thử CI
+
+- Commit b9f46a8 đã push; 12/12 Node tests và web build qua. Giao diện 390×844 được kiểm tra bằng trình duyệt: thư viện mở đúng, phát/tạm dừng hoạt động, không có lỗi console.
+- Run 34738888608 dừng ở cấu hình test bundle chưa có PRODUCT_NAME, trước khi compile native. Đã thêm tên bundle và dùng scheme AppSmokeTests riêng để test target không tham gia archive App.
+- Chưa có IPA mới tại thời điểm ghi mục này; đang chạy lại CI.
