@@ -16,11 +16,7 @@
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
 		6A91BBCE1E2342E890BA04B4 /* FolderAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4950E2EB4A7D4C128B6F14E9 /* FolderAccessStore.swift */; };
-		7D2403875CB94A70A219BAD6 /* FolderPickerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = D736887B7F974E6192831C28 /* FolderPickerPlugin.m */; };
 		22E85558DF74491F9D5B41EF /* FolderPickerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72AD4630E47E3B8A68918 /* FolderPickerPlugin.swift */; };
-		716303D1239B4CF283DD2D5C /* LocalFileServerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = E2862F4363404A39B45F0609 /* LocalFileServerPlugin.m */; };
-		41E9C4AA98C3487183C37F4B /* LocalFileServerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4B02EE58604D53B6DF508A /* LocalFileServerPlugin.swift */; };
-		C59BB8AA3923490AB62CBBDF /* NativeAudioPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E3F2D6086344BCF99811535 /* NativeAudioPlugin.m */; };
 		025EBC621FCB4959854E3860 /* NativeAudioPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FBF6B8E174CA9A597EAEF /* NativeAudioPlugin.swift */; };
 		5D197AC5972F47B89DD88BB0 /* VibeBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3315F2899F004466973B9960 /* VibeBridgeViewController.swift */; };
 /* End PBXBuildFile section */
@@ -38,14 +34,10 @@
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
-		4950E2EB4A7D4C128B6F14E9 /* FolderAccessStore.swift */ = {isa = PBXFileReference; name = "FolderAccessStore.swift"; path = "FolderAccessStore.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		D736887B7F974E6192831C28 /* FolderPickerPlugin.m */ = {isa = PBXFileReference; name = "FolderPickerPlugin.m"; path = "FolderPickerPlugin.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
-		9FF72AD4630E47E3B8A68918 /* FolderPickerPlugin.swift */ = {isa = PBXFileReference; name = "FolderPickerPlugin.swift"; path = "FolderPickerPlugin.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		E2862F4363404A39B45F0609 /* LocalFileServerPlugin.m */ = {isa = PBXFileReference; name = "LocalFileServerPlugin.m"; path = "LocalFileServerPlugin.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
-		7A4B02EE58604D53B6DF508A /* LocalFileServerPlugin.swift */ = {isa = PBXFileReference; name = "LocalFileServerPlugin.swift"; path = "LocalFileServerPlugin.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		4E3F2D6086344BCF99811535 /* NativeAudioPlugin.m */ = {isa = PBXFileReference; name = "NativeAudioPlugin.m"; path = "NativeAudioPlugin.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
-		FA3FBF6B8E174CA9A597EAEF /* NativeAudioPlugin.swift */ = {isa = PBXFileReference; name = "NativeAudioPlugin.swift"; path = "NativeAudioPlugin.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		3315F2899F004466973B9960 /* VibeBridgeViewController.swift */ = {isa = PBXFileReference; name = "VibeBridgeViewController.swift"; path = "VibeBridgeViewController.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		4950E2EB4A7D4C128B6F14E9 /* FolderAccessStore.swift */ = {isa = PBXFileReference; name = "FolderAccessStore.swift"; path = "FolderAccessStore.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; includeInIndex = 0; };
+		9FF72AD4630E47E3B8A68918 /* FolderPickerPlugin.swift */ = {isa = PBXFileReference; name = "FolderPickerPlugin.swift"; path = "FolderPickerPlugin.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; includeInIndex = 0; };
+		FA3FBF6B8E174CA9A597EAEF /* NativeAudioPlugin.swift */ = {isa = PBXFileReference; name = "NativeAudioPlugin.swift"; path = "NativeAudioPlugin.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; includeInIndex = 0; };
+		3315F2899F004466973B9960 /* VibeBridgeViewController.swift */ = {isa = PBXFileReference; name = "VibeBridgeViewController.swift"; path = "VibeBridgeViewController.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,11 +90,7 @@
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
 				4950E2EB4A7D4C128B6F14E9 /* FolderAccessStore.swift */,
-				D736887B7F974E6192831C28 /* FolderPickerPlugin.m */,
 				9FF72AD4630E47E3B8A68918 /* FolderPickerPlugin.swift */,
-				E2862F4363404A39B45F0609 /* LocalFileServerPlugin.m */,
-				7A4B02EE58604D53B6DF508A /* LocalFileServerPlugin.swift */,
-				4E3F2D6086344BCF99811535 /* NativeAudioPlugin.m */,
 				FA3FBF6B8E174CA9A597EAEF /* NativeAudioPlugin.swift */,
 				3315F2899F004466973B9960 /* VibeBridgeViewController.swift */,
 			);
@@ -235,11 +223,7 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				6A91BBCE1E2342E890BA04B4 /* FolderAccessStore.swift in Sources */,
-				7D2403875CB94A70A219BAD6 /* FolderPickerPlugin.m in Sources */,
 				22E85558DF74491F9D5B41EF /* FolderPickerPlugin.swift in Sources */,
-				716303D1239B4CF283DD2D5C /* LocalFileServerPlugin.m in Sources */,
-				41E9C4AA98C3487183C37F4B /* LocalFileServerPlugin.swift in Sources */,
-				C59BB8AA3923490AB62CBBDF /* NativeAudioPlugin.m in Sources */,
 				025EBC621FCB4959854E3860 /* NativeAudioPlugin.swift in Sources */,
 				5D197AC5972F47B89DD88BB0 /* VibeBridgeViewController.swift in Sources */,
 			);
@@ -380,7 +364,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -400,7 +384,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

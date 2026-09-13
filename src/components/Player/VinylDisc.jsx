@@ -5,7 +5,7 @@ export default function VinylDisc({ coverArt, isPlaying }) {
     <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
       <div 
         style={{
-          width: '280px', height: '280px', borderRadius: '50%',
+          width: 'min(280px, 68vw, 34dvh)', aspectRatio: '1', borderRadius: '50%',
           backgroundColor: '#111', position: 'relative',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(108, 92, 231, 0.2)',

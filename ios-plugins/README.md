@@ -1,38 +1,11 @@
-# iOS Native Plugins cho VibePlayer
+# Native code VibePlayer
 
-## Cách cài đặt
+Mã đang dùng nằm trong `ios/App/App/`: FolderAccessStore.swift, FolderPickerPlugin.swift, NativeAudioPlugin.swift và VibeBridgeViewController.swift.
 
-Sau khi chạy `npx cap add ios`, copy các file sau vào `ios/App/App/`:
+Các file Swift/Objective-C còn lại trong thư mục `ios-plugins/` là bản tham khảo cũ. Không copy chúng vào app: cơ chế hiện tại dùng CAPBridgedPlugin bằng Swift và phát trực tiếp bằng AVPlayer, không dùng GCDWebServer.
 
-1. `FolderPickerPlugin.swift`
-2. `FolderPickerPlugin.m`
-3. `LocalFileServerPlugin.swift`
-4. `LocalFileServerPlugin.m`
+Main.storyboard phải mở VibeBridgeViewController; controller này đăng ký FolderPicker và NativeAudio trong capacitorDidLoad. Mỗi file Swift phải có trong Sources của target App.
 
-## GCDWebServer dependency
+CI chạy AppTests/NativeBridgeTests.swift thông qua scripts/configure-ios-tests.rb để xác nhận storyboard thật, plugin exports và vòng gọi JavaScript/native, trước khi đóng gói IPA.
 
-Thêm dòng sau vào `ios/App/Podfile`, bên trong block `target 'App'`:
-
-```ruby
-pod 'GCDWebServer', '~> 3.5'
-```
-
-Sau đó chạy:
-```bash
-cd ios/App && pod install
-```
-
-## Plugins
-
-### FolderPicker
-- `checkBookmark()` — Kiểm tra bookmark folder đã lưu
-- `pickFolder()` — Mở UI chọn folder
-- `scanFolder()` — Quét file media trong folder đã chọn
-- `clearBookmark()` — Xóa bookmark đã lưu
-
-### LocalFileServer
-- `getServerUrl()` — Lấy URL server local
-- `startFileServer()` — Khởi động server phục vụ file
-
-Server chạy tại `http://localhost:8765`
-Để phát file: `http://localhost:8765/file?path=<encoded_file_path>`
+Đọc AI-HANDOFF/CURRENT-PLAN.md ở gốc repository trước khi thay đổi kiến trúc.

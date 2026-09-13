@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - 'scripts/**'
       - 'ios/**'
       - 'package*.json'
       - 'index.html'
@@ -50,6 +51,16 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
+      - name: Test native plugin registration on iOS Simulator
+        run: |
+          set -o pipefail
+          ruby scripts/configure-ios-tests.rb
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
+            -resultBundlePath "$RUNNER_TEMP/NativeBridgeTests.xcresult" \
+            CODE_SIGNING_ALLOWED=NO test 2>&1 | tee "$RUNNER_TEMP/native-tests.log"
+
       - name: Build unsigned archive
         run: |
           set -o pipefail
@@ -86,5 +97,16 @@ jobs:
         with:
           name: ios-build-log
           path: ${{ runner.temp }}/xcodebuild.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload native test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-plugin-tests
+          path: |
+            ${{ runner.temp }}/native-tests.log
+            ${{ runner.temp }}/NativeBridgeTests.xcresult
           if-no-files-found: ignore
           retention-days: 7

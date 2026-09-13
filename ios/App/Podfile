@@ -16,8 +16,6 @@ end
 
 target 'App' do
   capacitor_pods
-  # GCDWebServer - local HTTP server để phát file nhạc/video cho WebView
-  pod 'GCDWebServer', '~> 3.5'
 end
 
 post_install do |installer|
