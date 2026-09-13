@@ -75,3 +75,10 @@
 - Kiểm thử tại mốc này: 16/16 Node app tests, 5/5 backend HTTP tests với store/provider giả; web build thành công. Chưa test native/IPA của bản mở rộng, chưa chạy API Gemini/YouTube thật, chưa nối Postgres thật.
 - Đang tiếp tục: tạo Postgres Railway, cấu hình service/domain, UI mobile QA, native CI và IPA. Đã yêu cầu người dùng tự thêm GEMINI_API_KEY, YOUTUBE_API_KEY, APP_PASSWORD vào Railway; chưa nhận xác nhận hoàn tất.
 - Không đánh dấu các phase hoàn tất. Cần thử trên iPhone thật sau khi CI qua. Quảng cáo YouTube/đăng nhập embedded có giới hạn, UI ghi rõ và có Safari fallback.
+
+## 2026-09-13 — Codex — Kiểm thử PostgreSQL qua, bổ sung runtime CI
+
+- Commit 36028b2 đã push. Backend CI 34768882758 thành công, gồm HTTP tests và PostgreSQL thật: ghi/đọc, tranh chấp revision, kết nối lại vẫn giữ dữ liệu.
+- iOS CI 34768882781 dừng trước compile vì runner không có simulator iPhone 16/iOS 18.5. Bổ sung scripts/prepare-ios-simulator.mjs để cài runtime còn thiếu và tạo thiết bị, không bỏ qua XCTest.
+- UI 390x844: SVG đồng nhất; play/pause/next, đổi thứ tự queue không reset vị trí, ẩn → quét lại → reload vẫn ẩn, khôi phục, yêu thích/tag/thêm playlist đã xác minh bằng trình duyệt.
+- Railway: PostgreSQL đã Online; đã thêm tham chiếu DATABASE_URL vào IPTP, đang áp dụng/deploy và tạo endpoint.

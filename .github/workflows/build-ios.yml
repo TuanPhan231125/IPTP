@@ -25,7 +25,7 @@ concurrency:
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -55,9 +55,10 @@ jobs:
         run: |
           set -o pipefail
           ruby scripts/configure-ios-tests.rb
+          SIMULATOR_UDID="$(node scripts/prepare-ios-simulator.mjs)"
           xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme AppSmokeTests -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
             -resultBundlePath "$RUNNER_TEMP/NativeBridgeTests.xcresult" \
             CODE_SIGNING_ALLOWED=NO test 2>&1 | tee "$RUNNER_TEMP/native-tests.log"
 
