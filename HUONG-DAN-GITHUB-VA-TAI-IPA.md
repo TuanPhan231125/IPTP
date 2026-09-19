@@ -1,8 +1,10 @@
-# VibePlayer: đưa mã lên GitHub và lấy file IPA
+# TPUGSOUND: đưa mã lên GitHub và lấy file IPA
 
-Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`, kiểm tra ngày 13/09/2026.
+Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`, kiểm tra ngày 19/09/2026.
 
-Repository đang dùng là **[TuanPhan231125/IPTP](https://github.com/TuanPhan231125/IPTP)**. Mã đã được push; bạn không cần tạo repository hoặc khởi tạo Git lại. Để tải bản mới, bắt đầu từ bước 4–6 bên dưới. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký](AI-HANDOFF/CHANGELOG.md) để biết commit/build nào đã được kiểm chứng. Thử nhạc local và nghe nền trên iPhone vẫn là bước cần thực hiện trước khi chốt Phase 1.
+Repository đang dùng là **[TuanPhan231125/IPTP](https://github.com/TuanPhan231125/IPTP)**. Mã đã được push; bạn không cần tạo repository hoặc khởi tạo Git lại. Để tải bản mới, bắt đầu từ bước 4–6 bên dưới. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký](AI-HANDOFF/CHANGELOG.md) để biết commit/build nào đã được kiểm chứng.
+
+Bản mới nhất đã kiểm chứng trên GitHub Actions là commit `edaf0f5`, run `34769028210`, workflow **Build Unsigned iOS IPA** màu xanh. Artifact cần tải là **TPUGSOUND-unsigned-ipa**. Vẫn cần cài lên iPhone thật để xác nhận chọn thư mục, phát nền và video/local media ngoài Simulator.
 
 ## 1. Cần up những gì?
 
@@ -35,7 +37,7 @@ Phần này là hướng dẫn cho lần tạo dự án mới. Với IPTP đã t
 
 1. Bấm nút xanh **Create repository** ở bên trái ảnh bạn gửi, hoặc mở [trang tạo repository](https://github.com/new).
 2. **Owner**: chọn tài khoản của bạn.
-3. **Repository name**: nhập `vibeplayer`.
+3. **Repository name**: nhập `tpugsound` hoặc tên bạn muốn dùng.
 4. Chọn **Private** để giữ mã riêng tư.
 5. Để trống **Add README**; chọn **None** cho `.gitignore` và license. Dự án trên máy đã có nội dung sẵn.
 6. Bấm **Create repository**.
@@ -79,7 +81,7 @@ Dấu chấm nghĩa là xét toàn bộ nội dung dự án hiện tại; `.giti
 **Bước D — tạo bản lưu trên máy:**
 
 ```powershell
-git commit -m "Luu ma nguon VibePlayer ban dau"
+git commit -m "Luu ma nguon TPUGSOUND ban dau"
 ```
 
 **Bước E — kết nối và đẩy lên GitHub:**
@@ -87,7 +89,7 @@ git commit -m "Luu ma nguon VibePlayer ban dau"
 Thay toàn bộ URL ví dụ bằng URL vừa sao chép ở bước 2.
 
 ```powershell
-git remote add origin 'https://github.com/TEN_TAI_KHOAN/vibeplayer.git'
+git remote add origin 'https://github.com/TEN_TAI_KHOAN/tpugsound.git'
 git push -u origin main
 ```
 
@@ -103,7 +105,7 @@ Workflow **Build Unsigned iOS IPA** tự chạy khi push thay đổi code, tests
 
 Sau khi phần iOS đã được sửa và đẩy lên:
 
-1. Mở repository `vibeplayer`.
+1. Mở repository `IPTP`.
 2. Chọn tab **Actions**.
 3. Nếu GitHub yêu cầu bật Actions, bật cho repository này.
 4. Bên trái chọn **Build Unsigned iOS IPA**.
@@ -122,15 +124,15 @@ Khi workflow thành công:
 
 1. Vào **Actions** → mở lượt chạy thành công vừa rồi.
 2. Ở trang tổng quan lượt chạy (**Summary**), kéo xuống mục **Artifacts**.
-3. Bấm **VibePlayer-unsigned-ipa**. Đây là tên được khai báo trong workflow của dự án.
+3. Bấm **TPUGSOUND-unsigned-ipa**. Đây là tên được khai báo trong workflow của dự án.
 4. Trình duyệt tải một file ZIP, thường vào **Downloads**.
 5. Bấm chuột phải file ZIP → **Extract All… / Giải nén tất cả…** → **Extract**.
 6. Mở thư mục vừa giải nén. Lấy file **App.ipa** bên trong.
 
 ```text
-Artifacts: VibePlayer-unsigned-ipa
+Artifacts: TPUGSOUND-unsigned-ipa
           ↓ tải xuống
-VibePlayer-unsigned-ipa.zip
+TPUGSOUND-unsigned-ipa.zip
           ↓ giải nén ZIP bên ngoài
 App.ipa
           ↓ đưa vào Sideloadly
@@ -164,7 +166,7 @@ Khi code đã được chỉnh xong, mở PowerShell tại APPIOS rồi chạy:
 npm run build
 git add .
 git diff --cached --name-only
-git commit -m "Cap nhat VibePlayer"
+git commit -m "Cap nhat TPUGSOUND"
 git push
 ```
 
@@ -184,3 +186,22 @@ Sau đó lặp lại bước 4–6. Workflow tự build web và sync iOS, nên k
 | Sideloadly không thấy điện thoại | Kiểm tra cáp, mở khóa/Tin cậy và driver theo FAQ chính thức |
 
 Luôn tải IPA từ lượt chạy thành công được ghi trong AI-HANDOFF. Một lượt build đỏ không tạo ra bản IPA đã sửa; việc tải lại artifact của lượt xanh cũ sẽ vẫn lấy app cũ. Cài đè bằng cùng Apple ID/bundle ID trong Sideloadly để giữ dữ liệu hiện có.
+
+## 9. Railway, Gemini và YouTube
+
+Backend đã có trong thư mục `server/` và được cấu hình để Railway chạy bằng `Dockerfile`. Endpoint dự kiến trong app là:
+
+```text
+https://iptp-production.up.railway.app
+```
+
+Trạng thái kiểm tra ngày 19/09/2026: project Railway đang báo **Trial expired** và cả `IPTP` lẫn `Postgres` đều **Service offline**, nên endpoint public trả 404 dù code backend có route `/health`. Đây không phải là lỗi IPA. Sau khi workspace Railway được chọn plan hoặc chuyển sang host khác, cần có các biến môi trường sau trên service backend:
+
+| Biến | Mục đích |
+|---|---|
+| `DATABASE_URL` | Kết nối Postgres; có thể dùng reference từ service Postgres |
+| `APP_PASSWORD` | Mật khẩu bạn tự đặt để app đăng nhập đồng bộ; tối thiểu 16 ký tự |
+| `GEMINI_API_KEY` | Gọi Gemini từ backend, không nhúng key vào IPA |
+| `YOUTUBE_API_KEY` | Tìm video YouTube từ backend, không nhúng key vào IPA |
+
+Không ghi các giá trị secret này vào GitHub, file markdown hoặc ảnh chụp. Khi Railway chạy lại, thử `https://iptp-production.up.railway.app/health`; nếu trả `{"app":"TPUGSOUND","apiVersion":1}` thì mới kết nối app trong tab **Cài đặt** bằng endpoint trên và `APP_PASSWORD`.

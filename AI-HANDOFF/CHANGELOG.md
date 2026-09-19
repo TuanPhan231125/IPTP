@@ -82,3 +82,14 @@
 - iOS CI 34768882781 dừng trước compile vì runner không có simulator iPhone 16/iOS 18.5. Bổ sung scripts/prepare-ios-simulator.mjs để cài runtime còn thiếu và tạo thiết bị, không bỏ qua XCTest.
 - UI 390x844: SVG đồng nhất; play/pause/next, đổi thứ tự queue không reset vị trí, ẩn → quét lại → reload vẫn ẩn, khôi phục, yêu thích/tag/thêm playlist đã xác minh bằng trình duyệt.
 - Railway: PostgreSQL đã Online; đã thêm tham chiếu DATABASE_URL vào IPTP, đang áp dụng/deploy và tạo endpoint.
+
+## 2026-09-19 — Codex — IPA TPUGSOUND đã build xanh, Railway bị khóa trial
+
+- **Yêu cầu/nguyên nhân:** tiếp tục phần còn dở sau khi người dùng yêu cầu làm cả local, Railway, Gemini và YouTube.
+- **Kế hoạch trước → sau:** trước đó iOS CI fail vì thiếu simulator runtime; sau commit `edaf0f5`, workflow tự chuẩn bị runtime/thiết bị Simulator và không bỏ qua native XCTest.
+- **Đã thực hiện/xác minh:** GitHub Actions run `34769028210` của **Build Unsigned iOS IPA** đã thành công trên commit `edaf0f5`. Artifact thật hiện có là `TPUGSOUND-unsigned-ipa`; artifact test native là `native-plugin-tests`.
+- **Railway:** mở project `871d544c-4630-42b4-ac03-38f7f014be3e` bằng phiên người dùng đăng nhập. UI báo `Limited Access Your trial has expired`, service `IPTP` offline và `Postgres` offline. Kiểm tra public endpoint `https://iptp-production.up.railway.app/`, `/health`, `/api/status` đều trả 404 vì service không chạy.
+- **File thay đổi:** cập nhật `HUONG-DAN-GITHUB-VA-TAI-IPA.md` cho tên TPUGSOUND, artifact mới, commit/run đã kiểm chứng và phần Railway/Gemini/YouTube; cập nhật `AI-HANDOFF/CURRENT-PLAN.md`.
+- **Kiểm thử/bằng chứng:** `git status` sạch trước khi sửa tài liệu; GitHub API xác nhận run success và artifact chưa expired. Không chạy lại test code vì chỉ sửa tài liệu sau khi CI xanh.
+- **Chưa thực hiện hoặc chưa xác minh:** chưa cài IPA mới lên iPhone thật; chưa xác minh Gemini/YouTube thật vì Railway cần người dùng chọn plan hoặc host khác và tự thêm `APP_PASSWORD`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`.
+- **Bước tiếp theo:** người dùng tải `TPUGSOUND-unsigned-ipa` từ run `34769028210`, cài đè bằng Sideloadly, thử local playback/background/video. Với cloud, trước tiên xử lý Railway trial hoặc chọn host khác.
