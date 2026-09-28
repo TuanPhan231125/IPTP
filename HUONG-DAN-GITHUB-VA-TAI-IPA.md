@@ -1,10 +1,10 @@
 # TPUGSOUND: đưa mã lên GitHub và lấy file IPA
 
-Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`, kiểm tra ngày 19/09/2026.
+Hướng dẫn dành cho thư mục `C:\Users\DINH TUAN\OneDrive\Desktop\APPIOS`, kiểm tra ngày 28/09/2026.
 
 Repository đang dùng là **[TuanPhan231125/IPTP](https://github.com/TuanPhan231125/IPTP)**. Mã đã được push; bạn không cần tạo repository hoặc khởi tạo Git lại. Để tải bản mới, bắt đầu từ bước 4–6 bên dưới. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký](AI-HANDOFF/CHANGELOG.md) để biết commit/build nào đã được kiểm chứng.
 
-Bản mới nhất đã kiểm chứng trên GitHub Actions là commit `edaf0f5`, run `34769028210`, workflow **Build Unsigned iOS IPA** màu xanh. Artifact cần tải là **TPUGSOUND-unsigned-ipa**. Vẫn cần cài lên iPhone thật để xác nhận chọn thư mục, phát nền và video/local media ngoài Simulator.
+Bản mới nhất đã kiểm chứng trên GitHub Actions là commit `517f238`, run `36451578400`, workflow **Build Unsigned iOS IPA** màu xanh. Artifact cần tải là **TPUGSOUND-unsigned-ipa**. Bản này mở YouTube mobile toàn màn hình; vuốt từ mép trái để vào Nhạc local. Vẫn cần cài lên iPhone thật để xác nhận đăng nhập YouTube, thao tác vuốt, chọn thư mục và phát nền local ngoài Simulator.
 
 ## 1. Cần up những gì?
 

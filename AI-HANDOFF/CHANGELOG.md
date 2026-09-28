@@ -103,3 +103,12 @@
 - **Kiểm thử/bằng chứng:** `npm test` 17/17 qua; `npm run build` qua; `npm test --prefix server` 5/5 qua, 1 PostgreSQL test skip do không có `DATABASE_URL` cục bộ. Chưa chạy XCTest/macOS archive, chưa tạo IPA mới và chưa thử iPhone.
 - **Chưa thực hiện hoặc chưa xác minh:** Google có thể từ chối đăng nhập WebView; cần thử thiết bị thật. Không có ad block, tải video YouTube hoặc phát nền YouTube theo yêu cầu đã xác nhận. Railway vẫn trial expired nên Gemini/cloud thật chưa hoạt động.
 - **Bước tiếp theo:** xem lại diff, push và chờ native CI/IPA; sau đó thử iPhone với YouTube, edge swipe và playback Local.
+
+## 2026-09-28 — Codex — IPA YouTube mobile đã build xanh
+
+- **Yêu cầu/nguyên nhân:** hoàn tất kiểm chứng và tạo IPA cho commit đổi YouTube thành màn hình mở đầu.
+- **Đã thực hiện/xác minh:** commit `517f238` đã push lên `main`. GitHub Actions run `36451578400` của **Build Unsigned iOS IPA** thành công: Node tests, Vite build, Capacitor sync, native XCTest Simulator, unsigned archive, package IPA và artifact upload. Backend run `36451578384` cũng thành công.
+- **Artifact thật:** `TPUGSOUND-unsigned-ipa`, 910,823 bytes, chưa hết hạn tại lúc kiểm tra; có thêm artifact `native-plugin-tests`.
+- **File thay đổi sau CI:** `HUONG-DAN-GITHUB-VA-TAI-IPA.md`, `AI-HANDOFF/CURRENT-PLAN.md`, nhật ký này để ghi run/artifact đã kiểm chứng.
+- **Chưa thực hiện hoặc chưa xác minh:** chưa cài `App.ipa` mới lên iPhone iOS 18.7.8; cần xác minh YouTube/Google login, edge swipe và phát nền Local trên thiết bị thật. Railway vẫn trial expired.
+- **Bước tiếp theo:** tải artifact từ run `36451578400`, giải nén, cài bằng Sideloadly rồi thử các mục trên.
