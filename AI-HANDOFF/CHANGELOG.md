@@ -122,3 +122,12 @@
 - **Kiểm thử/bằng chứng:** Code Swift hợp lệ. Sẽ được build qua GitHub Actions ngay sau khi commit.
 - **Chưa thực hiện hoặc chưa xác minh:** Chưa cài IPA lên iPhone thật để thử độ mượt của việc skip quảng cáo và kiểm chứng hack Visibility.
 - **Bước tiếp theo:** Đẩy mã lên GitHub, chờ GitHub Actions tạo artifact IPA mới và yêu cầu người dùng thử tính năng trên thiết bị thật.
+
+## 2026-09-29 — Codex — Sửa đáy YouTube và thao tác player Local
+
+- **Yêu cầu/nguyên nhân:** người dùng gửi ảnh iPhone: navigation YouTube chừa khoảng đáy quá cao; icon nốt nhạc chồng với lỗ tâm đĩa; cần vuốt xuống để thoát player Local về danh sách nhạc.
+- **Đã thực hiện:** `WKWebView` tắt auto content inset và reset inset mỗi lần safe area đổi; tâm đĩa không có ảnh bìa chỉ còn nhãn trơn/lỗ đĩa; player Local nhận một cú kéo xuống có chủ ý từ nửa trên màn, bỏ qua thao tác trên nút và thanh tua.
+- **File thay đổi:** `ios/App/App/VibeBridgeViewController.swift`, `src/components/Player/VinylDisc.jsx`, `src/components/Player/PlayerScreen.jsx`, `src/utils/gestures.js`, `tests/features.test.js`, kế hoạch và nhật ký này.
+- **Kiểm thử/bằng chứng:** `npm test` 18/18 qua; `npm run build` qua; backend test 5/5 qua, PostgreSQL test local skip vì không có `DATABASE_URL`.
+- **Chưa thực hiện hoặc chưa xác minh:** chưa qua XCTest/archive của thay đổi UI và chưa thử IPA UI mới trên iPhone; cần kiểm tra đáy YouTube và cử chỉ trên máy thật.
+- **Bước tiếp theo:** push, theo dõi workflow IPA, rồi cài đè artifact mới để thử đúng ba thay đổi giao diện.

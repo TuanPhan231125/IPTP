@@ -16,9 +16,9 @@ Người dùng yêu cầu TPUGSOUND mở thẳng YouTube mobile toàn màn hình
 
 ## Việc tiếp theo
 
-1. Chờ CI GitHub Actions chạy xong để có bản build IPA mới chứa cập nhật Adblock và Phát nền.
+1. Sửa giao diện từ ảnh iPhone ngày 29/09: bỏ icon nốt nhạc khỏi tâm đĩa; kéo xuống từ nửa trên player Local để trở về thư viện; `WKWebView` bỏ auto inset để YouTube không chừa đáy quá cao. Các sửa này đang chờ CI sau khi push.
 2. Tải `TPUGSOUND-unsigned-ipa` mới nhất, giải nén `App.ipa`, cài bằng Sideloadly.
-3. Kiểm tra YouTube hiển thị toàn màn hình, quảng cáo đã bị ẩn, tự động skip Sponsor và video vẫn phát khi tắt màn hình điện thoại.
+3. Kiểm tra YouTube hiển thị toàn màn hình sát đáy, thao tác kéo xuống Local và tâm đĩa không còn nốt nhạc bị chồng.
 4. Railway vẫn `Trial expired`. Cần nạp tiền hoặc đổi host nếu muốn dùng tính năng đám mây/Gemini.
 
 [Nhật ký](CHANGELOG.md) · [Hướng dẫn IPA](../HUONG-DAN-GITHUB-VA-TAI-IPA.md)

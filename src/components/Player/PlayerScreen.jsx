@@ -1,11 +1,22 @@
-import React from 'react';
+import React,{useRef} from 'react';
 import VinylDisc from './VinylDisc';
 import PlayerControls from './PlayerControls';
 import Icon from '../Icon';
+import {isPlayerDismissSwipe} from '../../utils/gestures';
 export default function PlayerScreen(props) {
  const {currentSong,isPlaying,onBack,onQueue,onMore,favorite,onFavorite,settings,showVideo}=props;
+ const touchStart=useRef(null);
  if(!currentSong)return null;
- return <section className="player-screen" aria-label="Bài đang phát">
+ const startSwipe=event=>{
+  if(event.touches.length!==1||event.target.closest('button,input,select,textarea,a'))return;
+  const touch=event.touches[0];touchStart.current={x:touch.clientX,y:touch.clientY};
+ };
+ const finishSwipe=event=>{
+  const touch=event.changedTouches[0];
+  if(isPlayerDismissSwipe(touchStart.current,{x:touch.clientX,y:touch.clientY},window.innerHeight))onBack();
+  touchStart.current=null;
+ };
+ return <section className="player-screen" aria-label="Bài đang phát" onTouchStart={startSwipe} onTouchEnd={finishSwipe} onTouchCancel={()=>{touchStart.current=null}}>
  {currentSong.coverArt&&<div className="player-backdrop" style={{backgroundImage:`url(${currentSong.coverArt})`}}/>}
  <header className="player-header"><button className="icon-button" aria-label="Trở lại thư viện" onClick={onBack}><Icon name="down"/></button><p className="eyebrow">TPUGSOUND · ĐANG PHÁT</p><button className="icon-button" aria-label="Tùy chọn bài đang phát" onClick={()=>onMore(currentSong)}><Icon name="more"/></button></header>
  <div className="player-body"><VinylDisc coverArt={currentSong.coverArt} isPlaying={isPlaying} settings={settings}/>

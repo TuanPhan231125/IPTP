@@ -174,6 +174,9 @@ final class YouTubeViewController: UIViewController, WKNavigationDelegate, WKUID
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = false
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInset = .zero
+        webView.scrollView.verticalScrollIndicatorInsets = .zero
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         NSLayoutConstraint.activate([webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -186,6 +189,12 @@ final class YouTubeViewController: UIViewController, WKNavigationDelegate, WKUID
         returnGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(returnGesture)
         open(url)
+    }
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        webView?.scrollView.contentInsetAdjustmentBehavior = .never
+        webView?.scrollView.contentInset = .zero
+        webView?.scrollView.verticalScrollIndicatorInsets = .zero
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

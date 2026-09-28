@@ -4,6 +4,7 @@ import {trackRef,visibleTracks,resolveTrack,moveItem,DEFAULT_COLLECTION} from '.
 import {normalizeSongs} from '../src/utils/library.js';
 import {createPlayerController} from '../src/player/controller.js';
 import {openYouTube} from '../src/cloud/api.js';
+import {isPlayerDismissSwipe} from '../src/utils/gestures.js';
 
 test('hidden media survives rescan and re-link, without hiding a namesake',()=>{
  const song={id:'f1:sub/a.flac',folderName:'Music',relativePath:'sub/a.flac',size:900,title:'A',artist:'B'};
@@ -40,5 +41,10 @@ test('web YouTube entry opens the mobile home or requested mobile video',async()
   assert.equal(opened[0][0],'https://m.youtube.com/');
   assert.equal(opened[1][0],'https://m.youtube.com/watch?v=abcdefghijk');
  }finally{globalThis.window=previous}
+});
+test('player dismisses only for a deliberate downward swipe from its upper half',()=>{
+ assert.equal(isPlayerDismissSwipe({x:180,y:120},{x:188,y:250},844),true);
+ assert.equal(isPlayerDismissSwipe({x:180,y:120},{x:340,y:260},844),false);
+ assert.equal(isPlayerDismissSwipe({x:180,y:620},{x:185,y:780},844),false);
 });
 
