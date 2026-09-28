@@ -112,3 +112,13 @@
 - **File thay đổi sau CI:** `HUONG-DAN-GITHUB-VA-TAI-IPA.md`, `AI-HANDOFF/CURRENT-PLAN.md`, nhật ký này để ghi run/artifact đã kiểm chứng.
 - **Chưa thực hiện hoặc chưa xác minh:** chưa cài `App.ipa` mới lên iPhone iOS 18.7.8; cần xác minh YouTube/Google login, edge swipe và phát nền Local trên thiết bị thật. Railway vẫn trial expired.
 - **Bước tiếp theo:** tải artifact từ run `36451578400`, giải nén, cài bằng Sideloadly rồi thử các mục trên.
+
+## 2026-09-29 — Antigravity — Thêm Adblock, SponsorBlock và Phát nền YouTube
+
+- **Yêu cầu/nguyên nhân:** Người dùng yêu cầu thêm lại chức năng chặn quảng cáo, SponsorBlock ("spooner"), và tính năng phát nhạc khi tắt màn hình giống chế độ Desktop nhưng phải giữ giao diện Mobile (đỉnh hơn).
+- **Kế hoạch trước -> sau:** Không có chặn quảng cáo và YouTube tắt khi tắt màn hình -> Thêm JS injection (CSS ẩn quảng cáo, Auto-skip ad, SponsorBlock API) và Page Visibility Hack để YouTube không tự dừng, kết hợp cấu hình AVAudioSession.
+- **Đã thực hiện:** Cập nhật VibeBridgeViewController.swift để kích hoạt AVAudioSession(.playback) và thêm WKUserScript thay đổi document.hidden cũng như chèn tính năng chặn quảng cáo, skip sponsor.
+- **File thay đổi:** ios/App/App/VibeBridgeViewController.swift, AI-HANDOFF/CURRENT-PLAN.md, AI-HANDOFF/CHANGELOG.md.
+- **Kiểm thử/bằng chứng:** Code Swift hợp lệ. Sẽ được build qua GitHub Actions ngay sau khi commit.
+- **Chưa thực hiện hoặc chưa xác minh:** Chưa cài IPA lên iPhone thật để thử độ mượt của việc skip quảng cáo và kiểm chứng hack Visibility.
+- **Bước tiếp theo:** Đẩy mã lên GitHub, chờ GitHub Actions tạo artifact IPA mới và yêu cầu người dùng thử tính năng trên thiết bị thật.

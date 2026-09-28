@@ -2,6 +2,7 @@ import Capacitor
 import UIKit
 import WebKit
 import Security
+import AVFoundation
 
 class VibeBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
@@ -87,10 +88,88 @@ final class YouTubeViewController: UIViewController, WKNavigationDelegate, WKUID
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override func viewDidLoad() {
         super.viewDidLoad()
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+        try? AVAudioSession.sharedInstance().setActive(true)
+        
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default()
         config.allowsInlineMediaPlayback = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
+        
+        let userController = WKUserContentController()
+        
+        let hideAdsCss = """
+            var style = document.createElement('style');
+            style.innerHTML = `
+                .ytp-ad-module,
+                ytm-promoted-video-renderer,
+                .video-ads,
+                .ytp-ad-overlay-container,
+                ytm-companion-ad-renderer { display: none !important; }
+            `;
+            document.head.appendChild(style);
+        """
+        let cssScript = WKUserScript(source: hideAdsCss, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        userController.addUserScript(cssScript)
+        
+        let adSponsorScriptSource = """
+            setInterval(() => {
+                const skipButton = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
+                if (skipButton) skipButton.click();
+                const adVideo = document.querySelector('.ad-showing video');
+                if (adVideo && !isNaN(adVideo.duration)) {
+                    adVideo.currentTime = adVideo.duration;
+                }
+            }, 500);
+
+            let currentVideoId = null;
+            let segments = [];
+            let timeUpdateListener = null;
+
+            function fetchSponsorSegments(videoId) {
+                fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&categories=["sponsor","intro","outro","interaction","selfpromo","music_offtopic"]`)
+                    .then(res => res.json())
+                    .then(data => {
+                        segments = data.map(item => item.segment);
+                    })
+                    .catch(err => console.error('SponsorBlock fetch error:', err));
+            }
+
+            setInterval(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const v = urlParams.get('v');
+                if (v && v !== currentVideoId) {
+                    currentVideoId = v;
+                    segments = [];
+                    fetchSponsorSegments(v);
+                    
+                    const videoElement = document.querySelector('video');
+                    if (videoElement && !timeUpdateListener) {
+                        timeUpdateListener = () => {
+                            if (!segments.length) return;
+                            const t = videoElement.currentTime;
+                            for (let seg of segments) {
+                                if (t >= seg[0] && t < seg[1]) {
+                                    videoElement.currentTime = seg[1];
+                                    break;
+                                }
+                            }
+                        };
+                        videoElement.addEventListener('timeupdate', timeUpdateListener);
+                    }
+                }
+            }, 1000);
+            
+            Object.defineProperty(document, 'hidden', { get: () => false });
+            Object.defineProperty(document, 'visibilityState', { get: () => 'visible' });
+            document.addEventListener('visibilitychange', (e) => e.stopImmediatePropagation(), true);
+            document.addEventListener('webkitvisibilitychange', (e) => e.stopImmediatePropagation(), true);
+        """
+        let jsScript = WKUserScript(source: adSponsorScriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        userController.addUserScript(jsScript)
+        
+        config.userContentController = userController
+        
         webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
         webView.uiDelegate = self
