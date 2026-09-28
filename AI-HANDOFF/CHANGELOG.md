@@ -143,3 +143,13 @@
   - React VinylDisc: Thêm layer reflection để tạo cảm giác xoay chân thực khi không có ảnh bìa.
   - React useAudioPlayer: Gọi pauseYouTube() khi Local player phát nhạc.
 - **Kiểm thử/bằng chứng:** Đã kiểm tra logic Swift và React. Chuẩn bị push để kích hoạt GitHub Actions.
+
+## 2026-09-29 — Codex — Sửa lỗi biên dịch iOS CI `exit code 65`
+
+- **Yêu cầu/nguyên nhân:** Người dùng báo bản build GitHub Actions thất bại. Run `36461078538` trên commit `caebce8` dừng tại bước `Test native plugin registration on iOS Simulator`, trước archive, với `Process completed with exit code 65`.
+- **Kế hoạch trước → sau:** chờ CI cho thay đổi YouTube native → vá lỗi Swift phát hiện trong CSS injection rồi chạy lại CI; chưa đánh dấu IPA hoàn tất.
+- **Đã thực hiện:** Đổi chuỗi CSS injection ở `VibeBridgeViewController.swift` sang raw multiline string và dùng `style.textContent` với template literal. Bản trước có escape `\\;` không hợp lệ trong Swift, làm hỏng quá trình biên dịch native.
+- **File thay đổi:** `ios/App/App/VibeBridgeViewController.swift`, `AI-HANDOFF/CURRENT-PLAN.md`, `AI-HANDOFF/CHANGELOG.md`.
+- **Kiểm thử/bằng chứng:** `npm test` 18/18 qua; `npm run build` qua; `npm test --prefix server` 5/5 qua, 1 test PostgreSQL skip vì không có `DATABASE_URL`; `npx cap sync ios` qua (không có CocoaPods/Xcode trên máy Windows nên không thể chạy XCTest/archive cục bộ); `git diff --check` không báo lỗi.
+- **Chưa thực hiện hoặc chưa xác minh:** Chưa có kết quả native XCTest, archive hoặc IPA của bản vá; chưa thử iPhone thật.
+- **Bước tiếp theo:** Commit/push bản vá, kiểm tra workflow mới phải qua native XCTest và archive trước khi tải IPA.

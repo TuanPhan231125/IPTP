@@ -124,15 +124,15 @@ final class YouTubeViewController: UIViewController, WKNavigationDelegate, WKUID
         userController.add(self, name: "ytInfo")
         
         // 6. Force Dark Mode & Hide Shorts
-        let cssSource = """
-            var style = document.createElement('style');
-            style.innerHTML = \
+        let cssSource = #"""
+            const style = document.createElement('style');
+            style.textContent = `
                 .ytp-ad-module, ytm-promoted-video-renderer, .video-ads,
                 ytm-reel-shelf-renderer, ytm-shorts-lockup-view-model,
                 .ytp-ad-overlay-container, ytm-companion-ad-renderer { display: none !important; }
-            \;
+            `;
             document.head.appendChild(style);
-        """
+        """#
         userController.addUserScript(WKUserScript(source: cssSource, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
         
         let jsSource = """
