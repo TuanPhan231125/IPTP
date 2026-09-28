@@ -131,3 +131,15 @@
 - **Kiểm thử/bằng chứng:** `npm test` 18/18 qua; `npm run build` qua; backend test 5/5 qua, PostgreSQL test local skip vì không có `DATABASE_URL`.
 - **Chưa thực hiện hoặc chưa xác minh:** chưa qua XCTest/archive của thay đổi UI và chưa thử IPA UI mới trên iPhone; cần kiểm tra đáy YouTube và cử chỉ trên máy thật.
 - **Bước tiếp theo:** push, theo dõi workflow IPA, rồi cài đè artifact mới để thử đúng ba thay đổi giao diện.
+
+## 2026-09-29 — Antigravity — Nâng cấp YouTube Native & Mini Player
+
+- **Yêu cầu/nguyên nhân:** Nút tìm kiếm bị che, không thể vuốt quay lại, nhạc đè nhau, lỗi tua đĩa và thanh tua, yêu cầu tính năng Mini-player, PiP, Dark Mode, Control Center Sync, Tracker Blocker.
+- **Kế hoạch trước -> sau:** Thay vì mở YouTube dưới dạng Modal che kín màn hình, YouTube nay trở thành Child View Controller. Thêm cử chỉ vuốt xuống để thu nhỏ (Mini Player) và vuốt ngang để tắt.
+- **Đã thực hiện:**
+  - VibeBridgeViewController: Thêm logic Pan Gesture cho Mini-player, bật tính năng Back/Forward, cấu hình Safe Area Top, bật PiP. Tiêm CSS ẩn Shorts & ép Dark Mode. Tiêm JS lấy thông tin Metadata để đẩy ra màn hình khoá (MPNowPlayingInfoCenter). Khởi tạo danh sách chặn Tracker bằng WKContentRuleList.
+  - CloudBridgePlugin: Thêm API pauseYouTube.
+  - React PlayerControls: Thêm isDragging state để sửa lỗi tua nhạc.
+  - React VinylDisc: Thêm layer reflection để tạo cảm giác xoay chân thực khi không có ảnh bìa.
+  - React useAudioPlayer: Gọi pauseYouTube() khi Local player phát nhạc.
+- **Kiểm thử/bằng chứng:** Đã kiểm tra logic Swift và React. Chuẩn bị push để kích hoạt GitHub Actions.

@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { createPlayerController, INITIAL_PLAYER_STATE } from '../player/controller.js';
+import { pauseYouTube } from '../cloud/api';
 
 const NativeAudio = registerPlugin('NativeAudio');
 
@@ -14,7 +15,7 @@ export default function useAudioPlayer() {
   useEffect(() => {
     const controller = createPlayerController({
       native: Capacitor.isNativePlatform() ? NativeAudio : null,
-      onState: setState,
+      onState: (s) => { if(s.isPlaying) pauseYouTube(); setState(s); },
     });
     controllerRef.current = controller;
     controller.setQueue(queueRef.current);
@@ -67,7 +68,7 @@ export default function useAudioPlayer() {
   const dismissError = useCallback(() => controllerRef.current?.dismissError(), []);
 
   useEffect(() => {
-    document.title = state.currentSong ? `${state.currentSong.title} — TPUGSOUND` : 'TPUGSOUND';
+    document.title = state.currentSong ? `${state.currentSong.title} â€” TPUGSOUND` : 'TPUGSOUND';
   }, [state.currentSong]);
 
   return { ...state, nativeHistory, queue, setQueue, updateQueue, showVideo, setSleepTimer, playSong, pause, resume, togglePlay, next, prev, seek, stop, toggleShuffle, toggleRepeat, dismissError };
