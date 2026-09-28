@@ -28,9 +28,13 @@ export async function disconnect(){
  if(Capacitor.isNativePlatform())await bridge.clearConnection();else sessionStorage.removeItem('tpug.connection');
  connection={endpoint:'',token:''};
 }
-export async function openYouTube(videoId,filterAds=false){
- if(!/^[\w-]{11}$/.test(videoId))throw new Error('Video ID không hợp lệ.');
- if(Capacitor.isNativePlatform())return bridge.openYouTube({videoId,filterAds});
- window.open('https://www.youtube.com/watch?v='+videoId,'_blank','noopener');
+export async function openYouTube(videoId){
+ if(videoId&&!/^[\w-]{11}$/.test(videoId))throw new Error('Video ID không hợp lệ.');
+ if(Capacitor.isNativePlatform())return bridge.openYouTube(videoId?{videoId}:{});
+ window.open(videoId?'https://m.youtube.com/watch?v='+videoId:'https://m.youtube.com/','_blank','noopener');
+}
+export function onYouTubeDismissed(listener){
+ if(!Capacitor.isNativePlatform())return {remove(){}};
+ return bridge.addListener('youtubeDismissed',listener);
 }
 

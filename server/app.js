@@ -16,7 +16,7 @@ export function sanitizeCollection(value){
  favorites:list(value.favorites,5000,ref),hidden:list(value.hidden,5000,ref),
  history:list(value.history,200,h=>({id:text(h.id,100),at:text(h.at,40),track:ref(h.track)})),
  profile:{genres:text(value.profile?.genres),languages:text(value.profile?.languages),artists:text(value.profile?.artists)},
- settings:{spin:Math.min(30,Math.max(3,Number(value.settings?.spin)||8)),tonearm:value.settings?.tonearm!==false,accent:/^#[a-fA-F0-9]{6}$/.test(value.settings?.accent)?value.settings.accent:'#8c7cf0',theme:value.settings?.theme==='light'?'light':'dark',filterAds:!!value.settings?.filterAds},
+ settings:{spin:Math.min(30,Math.max(3,Number(value.settings?.spin)||8)),tonearm:value.settings?.tonearm!==false,accent:/^#[a-fA-F0-9]{6}$/.test(value.settings?.accent)?value.settings.accent:'#8c7cf0',theme:value.settings?.theme==='light'?'light':'dark'},
  tags:Object.fromEntries(Object.entries(value.tags||{}).slice(0,5000).map(([id,tags])=>[id.slice(0,2000),text(tags,200)]))};
 }
 export function createApp({store,env,provider,now=Date.now}){

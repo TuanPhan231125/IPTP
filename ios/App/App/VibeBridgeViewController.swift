@@ -2,7 +2,6 @@ import Capacitor
 import UIKit
 import WebKit
 import Security
-import SafariServices
 
 class VibeBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
@@ -56,62 +55,118 @@ public class CloudBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
     @objc func openYouTube(_ call: CAPPluginCall) {
-        guard let id = call.getString("videoId"), id.range(of: "^[A-Za-z0-9_-]{11}$", options: .regularExpression) != nil,
-              let url = URL(string: "https://m.youtube.com/watch?v=" + id) else { call.reject("Video ID không hợp lệ."); return }
+        let videoID = call.getString("videoId")
+        guard videoID == nil || videoID!.range(of: "^[A-Za-z0-9_-]{11}$", options: .regularExpression) != nil else {
+            call.reject("Video ID không hợp lệ.")
+            return
+        }
+        let url = videoID.flatMap { URL(string: "https://m.youtube.com/watch?v=" + $0) } ?? URL(string: "https://m.youtube.com/")!
         DispatchQueue.main.async {
-            guard let parent = self.bridge?.viewController, parent.presentedViewController == nil else { call.reject("Đóng cửa sổ đang mở trước."); return }
-            let controller = YouTubeViewController(url: url, filterAds: call.getBool("filterAds") ?? false)
-            let navigation = UINavigationController(rootViewController: controller)
-            navigation.modalPresentationStyle = .fullScreen
-            parent.present(navigation, animated: true) { call.resolve() }
+            guard let parent = self.bridge?.viewController else { call.reject("Không tìm thấy màn hình ứng dụng."); return }
+            if let controller = parent.presentedViewController as? YouTubeViewController {
+                controller.open(url)
+                call.resolve()
+                return
+            }
+            guard parent.presentedViewController == nil else { call.reject("Đóng cửa sổ đang mở trước."); return }
+            let controller = YouTubeViewController(url: url)
+            controller.onReturnToLocal = { [weak self] in
+                self?.notifyListeners("youtubeDismissed", data: ["destination": "local"])
+            }
+            controller.modalPresentationStyle = .fullScreen
+            parent.present(controller, animated: false) { call.resolve() }
         }
     }
 }
-final class YouTubeViewController: UIViewController, WKNavigationDelegate {
+final class YouTubeViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, UIGestureRecognizerDelegate {
     private let url: URL
-    private let filterAds: Bool
     private var webView: WKWebView!
-    init(url: URL, filterAds: Bool) { self.url = url; self.filterAds = filterAds; super.init(nibName: nil, bundle: nil) }
+    private var didShowGoogleWarning = false
+    var onReturnToLocal: (() -> Void)?
+    init(url: URL) { self.url = url; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "YouTube"
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Đóng", style: .done, target: self, action: #selector(close))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Safari", style: .plain, target: self, action: #selector(openSafari))
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default()
         config.allowsInlineMediaPlayback = true
+        config.preferences.javaScriptCanOpenWindowsAutomatically = true
         webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
+        webView.allowsBackForwardNavigationGestures = false
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         NSLayoutConstraint.activate([webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)])
-        if filterAds {
-            let rules = """
-            [{"trigger":{"url-filter":"^https?://([^/]+\\\\.)?(doubleclick\\\\.net|googlesyndication\\\\.com)/"},"action":{"type":"block"}}]
-            """
-            WKContentRuleListStore.default().compileContentRuleList(forIdentifier: "tpugsound-third-party-ads-v1", encodedContentRuleList: rules) { [weak self] list, _ in
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    if let list = list { self.webView.configuration.userContentController.add(list) }
-                    self.webView.load(URLRequest(url: self.url))
-                }
-            }
-        } else { webView.load(URLRequest(url: url)) }
+        let returnGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleReturnGesture(_:)))
+        returnGesture.edges = .left
+        returnGesture.delegate = self
+        returnGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(returnGesture)
+        open(url)
     }
-    @objc private func close() { webView.loadHTMLString("", baseURL: nil); dismiss(animated: true) }
-    @objc private func openSafari() { UIApplication.shared.open(webView.url ?? url) }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if !UserDefaults.standard.bool(forKey: "tpugsound.didSeeLocalGesture") {
+            UserDefaults.standard.set(true, forKey: "tpugsound.didSeeLocalGesture")
+            showMessage("Vuốt từ mép trái để mở Nhạc local")
+        }
+    }
+    func open(_ destination: URL) { webView?.load(URLRequest(url: destination)) }
+    @objc private func handleReturnGesture(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        guard gesture.state == .ended else { return }
+        let translation = gesture.translation(in: view).x
+        let velocity = gesture.velocity(in: view).x
+        guard translation > 90 || velocity > 500 else { return }
+        onReturnToLocal?()
+        dismiss(animated: false)
+    }
+    private func showMessage(_ message: String) {
+        let label = UILabel()
+        label.text = message
+        label.textColor = .white
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.78)
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.textAlignment = .center
+        label.numberOfLines = 2
+        label.layer.cornerRadius = 14
+        label.clipsToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 28),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -28),
+            label.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)])
+        UIView.animate(withDuration: 0.25, delay: 3.2, options: .curveEaseOut) { label.alpha = 0 } completion: { _ in label.removeFromSuperview() }
+    }
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let target = navigationAction.request.url else { decisionHandler(.cancel); return }
         guard ["https", "http", "about"].contains(target.scheme ?? "") else { decisionHandler(.cancel); return }
-        if target.host == "accounts.google.com" {
-            // Google sign-in may reject embedded WebViews. Use the system browser.
-            UIApplication.shared.open(url)
-            decisionHandler(.cancel)
-        } else { decisionHandler(.allow) }
+        decisionHandler(.allow)
+    }
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if navigationAction.targetFrame == nil, let target = navigationAction.request.url { webView.load(URLRequest(url: target)) }
+        return nil
+    }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation?, withError error: Error) {
+        if webView.url?.host?.contains("google") == true { showMessage("Google không thể đăng nhập trong cửa sổ này. Hãy thử lại sau hoặc dùng YouTube chính chủ.") }
+    }
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation?) {
+        guard !didShowGoogleWarning, webView.url?.host?.contains("google") == true else { return }
+        webView.evaluateJavaScript("document.body ? document.body.innerText.toLowerCase().slice(0, 5000) : ''") { [weak self] value, _ in
+            guard let self = self, let text = value as? String else { return }
+            let blockedMessages = ["disallowed_useragent", "this browser or app may not be secure", "không thể đăng nhập", "trình duyệt hoặc ứng dụng này có thể không an toàn"]
+            guard blockedMessages.contains(where: text.contains) else { return }
+            self.didShowGoogleWarning = true
+            self.showMessage("Google không cho đăng nhập trong cửa sổ này. Hãy dùng YouTube chính chủ.")
+        }
+    }
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        true
     }
 }
 

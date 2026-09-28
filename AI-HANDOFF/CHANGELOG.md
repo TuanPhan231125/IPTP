@@ -93,3 +93,13 @@
 - **Kiểm thử/bằng chứng:** `git status` sạch trước khi sửa tài liệu; GitHub API xác nhận run success và artifact chưa expired. Không chạy lại test code vì chỉ sửa tài liệu sau khi CI xanh.
 - **Chưa thực hiện hoặc chưa xác minh:** chưa cài IPA mới lên iPhone thật; chưa xác minh Gemini/YouTube thật vì Railway cần người dùng chọn plan hoặc host khác và tự thêm `APP_PASSWORD`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`.
 - **Bước tiếp theo:** người dùng tải `TPUGSOUND-unsigned-ipa` từ run `34769028210`, cài đè bằng Sideloadly, thử local playback/background/video. Với cloud, trước tiên xử lý Railway trial hoặc chọn host khác.
+
+## 2026-09-28 — Codex — Đổi YouTube thành màn hình mở đầu mobile
+
+- **Yêu cầu/nguyên nhân:** người dùng yêu cầu TPUGSOUND mở thẳng YouTube mobile, giao diện không có thanh công cụ TPUGSOUND; vuốt từ mép trái trở về Local và có mục YouTube trong Local.
+- **Kế hoạch trước → sau:** YouTube chỉ là cửa sổ video từ Khám phá, có Safari/toolbar và rule lọc một số quảng cáo → YouTube là `WKWebView` mobile toàn màn hình; Local là màn phía sau có thể mở bằng edge swipe.
+- **Đã thực hiện:** CloudBridge nhận `openYouTube` không cần video ID để mở Home, giữ cookie mặc định, cho Google sign-in chạy trong WebView, gỡ toolbar/Safari/content rule ad filtering và phát sự kiện khi edge swipe trở về Local. React tự mở YouTube trên iOS, nghe sự kiện trở về Local, thêm mục YouTube trong local navigation và chuyển video Gemini/Khám phá vào cùng màn. Backend không còn lưu `filterAds`.
+- **File thay đổi:** `ios/App/App/VibeBridgeViewController.swift`, `ios/App/AppTests/NativeBridgeTests.swift`, `src/App.jsx`, `src/cloud/api.js`, `server/app.js`, các test liên quan, `README.md`, `AI-HANDOFF/CURRENT-PLAN.md`.
+- **Kiểm thử/bằng chứng:** `npm test` 17/17 qua; `npm run build` qua; `npm test --prefix server` 5/5 qua, 1 PostgreSQL test skip do không có `DATABASE_URL` cục bộ. Chưa chạy XCTest/macOS archive, chưa tạo IPA mới và chưa thử iPhone.
+- **Chưa thực hiện hoặc chưa xác minh:** Google có thể từ chối đăng nhập WebView; cần thử thiết bị thật. Không có ad block, tải video YouTube hoặc phát nền YouTube theo yêu cầu đã xác nhận. Railway vẫn trial expired nên Gemini/cloud thật chưa hoạt động.
+- **Bước tiếp theo:** xem lại diff, push và chờ native CI/IPA; sau đó thử iPhone với YouTube, edge swipe và playback Local.

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {trackRef,visibleTracks,resolveTrack,moveItem,DEFAULT_COLLECTION} from '../src/utils/collection.js';
 import {normalizeSongs} from '../src/utils/library.js';
 import {createPlayerController} from '../src/player/controller.js';
+import {openYouTube} from '../src/cloud/api.js';
 
 test('hidden media survives rescan and re-link, without hiding a namesake',()=>{
  const song={id:'f1:sub/a.flac',folderName:'Music',relativePath:'sub/a.flac',size:900,title:'A',artist:'B'};
@@ -30,5 +31,14 @@ test('native queue editing sends updateQueue instead of restarting playback',asy
  const calls=[];const native={async addListener(){return {remove(){}}},async getState(){return {songId:'a',currentTime:42,isPlaying:true}},async updateQueue(args){calls.push(args)}};
  const p=createPlayerController({native,onState(){}});await p.ready;const songs=[{id:'a',url:'/a'},{id:'b',url:'/b'}];p.setQueue(songs);
  await p.updateQueue([...songs].reverse());assert.equal(p.getState().currentTime,42);assert.equal(calls.length,1);assert.equal(calls[0].songs[0].id,'b');p.dispose();
+});
+test('web YouTube entry opens the mobile home or requested mobile video',async()=>{
+ const previous=globalThis.window,opened=[];
+ globalThis.window={open:(...args)=>opened.push(args)};
+ try{
+  await openYouTube();await openYouTube('abcdefghijk');
+  assert.equal(opened[0][0],'https://m.youtube.com/');
+  assert.equal(opened[1][0],'https://m.youtube.com/watch?v=abcdefghijk');
+ }finally{globalThis.window=previous}
 });
 

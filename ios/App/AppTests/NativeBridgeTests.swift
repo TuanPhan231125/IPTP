@@ -12,7 +12,11 @@ final class NativeBridgeTests: XCTestCase {
         controller.loadViewIfNeeded()
         let bridge = try XCTUnwrap(controller.bridge)
         XCTAssertTrue(bridge.plugin(withName: "FolderPicker") is FolderPickerPlugin)
-        XCTAssertTrue(bridge.plugin(withName: "CloudBridge") is CloudBridgePlugin)
+        let cloud = try XCTUnwrap(bridge.plugin(withName: "CloudBridge") as? CloudBridgePlugin)
+        for method in ["saveConnection", "getConnection", "clearConnection", "openYouTube"] {
+            XCTAssertTrue(cloud.pluginMethods.contains(where: { $0.name == method }), "Missing bridge export: \(method)")
+            XCTAssertTrue(cloud.responds(to: NSSelectorFromString(method + ":")), "Missing Swift selector: \(method)")
+        }
         let audio = try XCTUnwrap(bridge.plugin(withName: "NativeAudio") as? NativeAudioPlugin)
         for method in ["setQueue", "play", "pause", "next", "previous", "seek", "setShuffle", "setRepeat", "stop", "getState", "updateQueue", "showVideo", "setSleepTimer", "getHistory"] {
             XCTAssertTrue(audio.pluginMethods.contains(where: { $0.name == method }), "Missing bridge export: \(method)")

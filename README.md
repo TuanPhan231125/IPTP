@@ -1,12 +1,12 @@
 # VibePlayer
 
-Ứng dụng nghe nhạc local cho iPhone, giao diện React và Capacitor. Đọc nhạc từ folder trong Tệp → Trên iPhone, không sao chép cả thư viện vào ứng dụng.
+Ứng dụng iPhone có YouTube mobile toàn màn hình và thư viện nhạc/video local. Vuốt từ mép trái YouTube để mở Local; Local đọc trực tiếp folder trong Tệp → Trên iPhone, không sao chép cả thư viện vào ứng dụng.
 
 Repository của dự án: [TuanPhan231125/IPTP](https://github.com/TuanPhan231125/IPTP).
 
 ## Trạng thái
 
-Đang hoàn thiện Phase 1: thư viện, metadata, player native iOS, nghe nền và điều khiển màn hình khóa. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký thay đổi](AI-HANDOFF/CHANGELOG.md) để biết kết quả build/kiểm thử thực tế. Video, backend, Gemini và YouTube thuộc các phase sau.
+YouTube không bị app chặn quảng cáo, không tải video vào Tệp và không được TPUGSOUND ép phát nền. Phát nền và quản lý video áp dụng cho media local. Xem [kế hoạch hiện tại](AI-HANDOFF/CURRENT-PLAN.md) và [nhật ký thay đổi](AI-HANDOFF/CHANGELOG.md) để biết kết quả build/kiểm thử thực tế.
 
 ## Chạy phần web
 

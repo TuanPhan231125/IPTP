@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useMemo,useRef} from 'react';
+import React,{useState,useEffect,useMemo,useRef,useCallback} from 'react';
 import {Capacitor} from '@capacitor/core';
 import useLibrary from './hooks/useLibrary';
 import useAudioPlayer from './hooks/useAudioPlayer';
@@ -6,7 +6,7 @@ import useLocalStorage from './hooks/useLocalStorage';
 import useCloud from './cloud/useCloud';
 import CloudPanel from './cloud/CloudPanel';
 import Discover from './cloud/Discover';
-import {openYouTube} from './cloud/api';
+import {openYouTube,onYouTubeDismissed} from './cloud/api';
 import {DEFAULT_COLLECTION,trackRef,matches,resolveTrack,visibleTracks,moveItem} from './utils/collection';
 import {filterAndSortSongs} from './utils/library';
 import FolderPickerScreen from './components/FolderPicker/FolderPickerScreen';
@@ -24,6 +24,13 @@ export default function App(){
  const visible=useMemo(()=>visibleTracks(library.songs,data.hidden),[library.songs,data.hidden]);
  const playable=useMemo(()=>visible.filter(s=>s.playable),[visible]);
  const lastHistory=useRef(null);
+ const youtubePresenting=useRef(false);
+ const showYouTube=useCallback(async videoId=>{
+  if(youtubePresenting.current)return;
+  youtubePresenting.current=true;
+  try{await openYouTube(videoId);if(!Capacitor.isNativePlatform())youtubePresenting.current=false;return true}
+  catch(error){youtubePresenting.current=false;setNotice(error.message);return false}
+ },[]);
  const favorite=song=>data.favorites.some(ref=>matches(ref,song));
  const toggleFavorite=song=>setData(d=>({...d,favorites:d.favorites.some(ref=>matches(ref,song))?d.favorites.filter(ref=>!matches(ref,song)):[...d.favorites,trackRef(song)]}));
  const settings=value=>setData(d=>({...d,settings:{...d.settings,...value}}));
@@ -33,6 +40,14 @@ export default function App(){
  };
  useEffect(()=>{if(!Capacitor.isNativePlatform()&&player.isPlaying&&player.currentSong&&lastHistory.current!==player.currentSong.id){lastHistory.current=player.currentSong.id;history(player.currentSong)}},[player.isPlaying,player.currentSong?.id]);
  useEffect(()=>{
+  let handle;
+  Promise.resolve(onYouTubeDismissed(()=>{youtubePresenting.current=false;setTab('library')})).then(value=>{handle=value});
+  return()=>{handle?.remove?.()};
+ },[]);
+ useEffect(()=>{
+  if(Capacitor.isNativePlatform())showYouTube();
+ },[showYouTube]);
+ useEffect(()=>{
   if(library.isLoading)return;
   const next=player.queue.map(old=>playable.find(s=>s.id===old.id)).filter(Boolean);
   if(player.currentSong&&!next.some(s=>s.id===player.currentSong.id)){player.stop();setShowPlayer(false)}
@@ -40,7 +55,7 @@ export default function App(){
  },[playable,library.isLoading]);
  useEffect(()=>{document.documentElement.dataset.theme=data.settings.theme||'dark';document.documentElement.style.setProperty('--accent',data.settings.accent||'#8c7cf0')},[data.settings]);
  const play=async(song,queue=playable)=>{
-  if(song.source==='youtube'){await player.pause();try{await openYouTube(song.videoId,!!data.settings.filterAds);history(song)}catch(e){setNotice(e.message)}return}
+  if(song.source==='youtube'){await player.pause();if(await showYouTube(song.videoId))history(song);return}
   if(song.playable===false){setNotice(song.playbackIssue);return}
   const next=queue.filter(s=>s.playable!==false&&s.source!=='youtube');
   player.setQueue(next.some(s=>s.id===song.id)?next:[song]);
@@ -95,11 +110,10 @@ export default function App(){
  <section className="settings-card form-stack"><h3>Đĩa than & giao diện</h3><label>Tốc độ xoay · {data.settings.spin} giây / vòng<input type="range" min="3" max="20" value={data.settings.spin} onChange={e=>settings({spin:Number(e.target.value)})}/></label><label className="check"><input type="checkbox" checked={data.settings.tonearm} onChange={e=>settings({tonearm:e.target.checked})}/>Hiện kim đĩa than</label><label>Giao diện<select value={data.settings.theme} onChange={e=>settings({theme:e.target.value})}><option value="dark">Tối</option><option value="light">Sáng</option></select></label><label>Màu chủ đạo<input type="color" value={data.settings.accent} onChange={e=>settings({accent:e.target.value})}/></label></section>
  <section className="settings-card form-stack"><h3>Thư viện & phát nhạc</h3><button className="soft-button" onClick={()=>setSheet({type:'folders'})}><Icon name="folder"/>Quản lý thư mục</button><button className="soft-button" onClick={()=>setSheet({type:'hidden'})}><Icon name="hidden"/>Tệp đã ẩn ({data.hidden.length})</button><label>Hẹn giờ tắt<select aria-label="Hẹn giờ tắt" defaultValue="0" onChange={e=>{player.setSleepTimer(Number(e.target.value));setNotice(e.target.value==='0'?'Đã hủy hẹn giờ.':'Đã đặt hẹn giờ '+e.target.value+' phút.')}} disabled={library.isDemo}><option value="0">Tắt hẹn giờ</option><option value="15">15 phút</option><option value="30">30 phút</option><option value="60">60 phút</option><option value="90">90 phút</option></select></label><p className="muted small">Mở video từ nút “Xem video” trong bài đang phát. Đóng video để trở về đĩa than, giữ nguyên vị trí nghe.</p></section>
  <section className="settings-card"><CloudPanel cloud={cloud}/></section>
- <section className="settings-card form-stack"><h3>YouTube</h3><label className="check"><input type="checkbox" checked={!!data.settings.filterAds} onChange={e=>settings({filterAds:e.target.checked})}/>Lọc một số nguồn quảng cáo bên ngoài</label><p className="muted small">Không đảm bảo bỏ quảng cáo trong video. Đăng nhập Google có thể cần Safari; phiên Safari và cửa sổ trong app không dùng chung đăng nhập. Nghe nền local hoạt động độc lập với YouTube.</p></section>
  <p className="muted small">TPUGSOUND · 1.1 · Giữ định danh bản cài VibePlayer.</p></div>}
  </div>
  {player.currentSong&&<MiniPlayer song={player.currentSong} isPlaying={player.isPlaying} onTogglePlay={player.togglePlay} onTap={()=>setShowPlayer(true)}/>}
- <nav className="bottom-nav" aria-label="Điều hướng chính">{[['library','music','Thư viện'],['collection','heart','Bộ sưu tập'],['discover','sparkles','Khám phá'],['settings','settings','Cài đặt']].map(([id,icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id?'page':undefined} onClick={()=>setTab(id)}><Icon name={icon}/><span>{label}</span></button>)}</nav>
+ <nav className="bottom-nav" aria-label="Điều hướng chính"><button aria-label="Mở YouTube" onClick={()=>showYouTube()}><Icon name="video"/><span>YouTube</span></button>{[['library','music','Thư viện'],['collection','heart','Bộ sưu tập'],['discover','sparkles','Khám phá'],['settings','settings','Cài đặt']].map(([id,icon,label])=><button key={id} className={tab===id?'active':''} aria-current={tab===id?'page':undefined} onClick={()=>setTab(id)}><Icon name={icon}/><span>{label}</span></button>)}</nav>
  {showPlayer&&player.currentSong&&<PlayerScreen {...player} settings={data.settings} favorite={favorite(player.currentSong)} onFavorite={toggleFavorite} onBack={()=>setShowPlayer(false)} onQueue={()=>setSheet({type:'queue'})} onMore={song=>setSheet({type:'track',song})}/>}
  {sheet&&<Sheet title={{folders:'Thư mục nhạc',hidden:'Tệp đã ẩn',track:sheet.song?.title,queue:'Hàng đợi',rename:'Đổi tên playlist',deletePlaylist:'Xóa playlist'}[sheet.type]} onClose={()=>setSheet(null)}>
  {sheet.type==='folders'&&<div className="form-stack"><p className="muted small">Đọc trực tiếp từ Tệp, gồm cả thư mục con. Gỡ thư mục khỏi app không xóa file gốc.</p>{library.folders.map(f=><div className="settings-card" key={f.id}><strong>{f.name}</strong>{f.error&&<p className="inline-error">{f.error}</p>}<button className="text-button" disabled={library.isLoading||picking} onClick={async()=>{if(player.currentSong?.folderId===f.id)await player.stop();await library.removeFolder(f.id);setFolder('all')}}>Gỡ khỏi thư viện</button></div>)}<button className="primary-button" disabled={picking||library.isLoading} onClick={pick}>{picking?'Đang chọn…':'Thêm thư mục'}</button><button className="soft-button" onClick={()=>setSheet({type:'hidden'})}>Quản lý tệp đã ẩn ({data.hidden.length})</button><p className="muted small">Nhận diện MP3, M4A, WAV, AAC, FLAC, ALAC, AIFF, CAF, AC3, MP4, MOV, M4V, 3GP, OGG, Opus, WebM, MKV, AVI, WMA. Khả năng phát phụ thuộc codec và iOS; tệp chưa hỗ trợ sẽ có lý do.</p></div>}

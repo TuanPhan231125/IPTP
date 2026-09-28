@@ -27,8 +27,9 @@ test('sync supports restore and rejects stale writes without losing data',async 
  assert.equal((await request('/api/state','GET',undefined,token)).body.data.tags.a,'chill');
 });
 test('sync whitelist never retains media bytes, absolute paths or API keys',()=>{
- const sanitized=sanitizeCollection({...blank,secret:'key',hidden:[{id:'abc',title:'Song',artist:'A',url:'/private/music/a.mp3',coverArt:'binary',source:'local',relativePath:'a.mp3',folderName:'Music'}]});
+ const sanitized=sanitizeCollection({...blank,secret:'key',settings:{...blank.settings,filterAds:true},hidden:[{id:'abc',title:'Song',artist:'A',url:'/private/music/a.mp3',coverArt:'binary',source:'local',relativePath:'a.mp3',folderName:'Music'}]});
  assert.ok(!('secret' in sanitized));assert.ok(!('url' in sanitized.hidden[0]));assert.ok(!('coverArt' in sanitized.hidden[0]));
+ assert.ok(!('filterAds' in sanitized.settings));
  assert.throws(()=>sanitizeCollection({...blank,playlists:'bad'}));
 });
 test('provider inputs validated and only authenticated users can request results',async t=>{
