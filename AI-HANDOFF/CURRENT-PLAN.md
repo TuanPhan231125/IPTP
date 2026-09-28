@@ -13,11 +13,11 @@ Người dùng yêu cầu TPUGSOUND mở thẳng YouTube mobile toàn màn hình
 - **Mới:** Cấu hình thêm `AVAudioSession` category `.playback` trước khi tạo WKWebView để hệ điều hành cho phép phát nhạc nền.
 - Google sign-in được cho phép chạy trong WebView. Nếu navigation tới Google thất bại, app hiển thị lý do thay vì tự chuyển sang Safari.
 - Local vẫn giữ các tính năng nhạc offline.
-- **Sửa CI 29/09:** GitHub Actions run `36461078538` dừng ở native XCTest với `exit code 65`. Bản vá local đã thay escape Swift sai trong CSS injection bằng raw multiline string chứa JavaScript hợp lệ; chưa có kết quả XCTest/archive mới.
+- **Sửa CI 29/09:** GitHub Actions run `36461078538` dừng ở native XCTest với `exit code 65`. Commit `b48a2fa` đã thay escape Swift sai trong CSS injection bằng raw multiline string chứa JavaScript hợp lệ; run thay thế `36462006913` đang chờ CI xác minh XCTest/archive.
 
 ## Việc tiếp theo
 
-1. Push bản vá CI, theo dõi lại native XCTest và unsigned archive; không coi build là đã xong trước khi workflow xanh.
+1. Theo dõi lại native XCTest và unsigned archive của run `36462006913`; không coi build là đã xong trước khi workflow xanh.
 2. Khi CI xanh, tải `TPUGSOUND-unsigned-ipa` mới nhất, giải nén `App.ipa`, cài bằng Sideloadly.
 3. Kiểm tra YouTube hiển thị toàn màn hình sát đáy, Mini Player/cử chỉ Local, tâm đĩa và phát nền trên iPhone thật.
 4. Railway vẫn `Trial expired`. Cần nạp tiền hoặc đổi host nếu muốn dùng tính năng đám mây/Gemini.

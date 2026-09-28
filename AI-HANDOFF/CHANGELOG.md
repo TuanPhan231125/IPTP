@@ -152,4 +152,5 @@
 - **File thay đổi:** `ios/App/App/VibeBridgeViewController.swift`, `AI-HANDOFF/CURRENT-PLAN.md`, `AI-HANDOFF/CHANGELOG.md`.
 - **Kiểm thử/bằng chứng:** `npm test` 18/18 qua; `npm run build` qua; `npm test --prefix server` 5/5 qua, 1 test PostgreSQL skip vì không có `DATABASE_URL`; `npx cap sync ios` qua (không có CocoaPods/Xcode trên máy Windows nên không thể chạy XCTest/archive cục bộ); `git diff --check` không báo lỗi.
 - **Chưa thực hiện hoặc chưa xác minh:** Chưa có kết quả native XCTest, archive hoặc IPA của bản vá; chưa thử iPhone thật.
-- **Bước tiếp theo:** Commit/push bản vá, kiểm tra workflow mới phải qua native XCTest và archive trước khi tải IPA.
+- **Đã push/CI:** Commit `b48a2fa` (`fix: correct iOS CSS user script literal`) đã push lên `main`; workflow thay thế `36462006913` đã được tạo và đang queued tại thời điểm ghi.
+- **Bước tiếp theo:** Kiểm tra workflow mới phải qua native XCTest và archive trước khi tải IPA.
